@@ -1,4 +1,5 @@
 require 'glimmer-dsl-libui'
+require 'time'
 
 class CashDrawer
 
@@ -21,12 +22,14 @@ class CashDrawer
 	attr_accessor :ones, :fives, :tens, :twentys, :fiftys, :bennys
 	attr_accessor :penny, :nickel, :dime, :quarter
 	attr_accessor :checks, :petty, :bank, :mvdue, :cbag
-	attr_accessor :date, :dtotal, :onhand, :ap
+	attr_accessor :date, :dtotal, :onhand, :ap, :dt
 
 	def initialize
 		@totals = [
-			Total.new('12/24/24', '$17.99', '$534.88', '$18.37')
+			Total.new('2024-11-23', '$17.99', '$534.88', '$18.37')
 		]
+
+
 	end
 	
 	
@@ -84,9 +87,14 @@ class CashDrawer
 									form {
 										stretchy false
 										
-										entry {
-											label 'Date'
-											text <=> [self, :date]
+										date_picker {
+											time <=> [self, :date]
+											@date = "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}"
+											p @date
+											on_changed do
+												@date = "#{date[:year]}-#{date[:mon]}-#{date[:mday]}"
+												p @date
+											end
 										}
 										
 										entry {
