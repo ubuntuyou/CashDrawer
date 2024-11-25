@@ -28,8 +28,6 @@ class CashDrawer
 		@totals = [
 			Total.new('2024-11-23', '$17.99', '$534.88', '$18.37')
 		]
-
-
 	end
 	
 	
@@ -86,16 +84,16 @@ class CashDrawer
 								vertical_box {
 									form {
 										stretchy false
-										
+
 										date_picker {
+											label 'Date'
 											time <=> [self, :date]
 											@date = "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}"
-											p @date
 											on_changed do
 												@date = "#{date[:year]}-#{date[:mon]}-#{date[:mday]}"
-												p @date
 											end
 										}
+										
 										
 										entry {
 											label 'Pennies'
@@ -206,7 +204,7 @@ class CashDrawer
 				
 				tab_item('Summary'){
 					table {
-						text_column('Date')
+						text_column('Date') {editable true}
 						text_column('Dtotal')
 						text_column('Onhand')
 						text_column('Ap')
