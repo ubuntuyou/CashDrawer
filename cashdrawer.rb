@@ -39,19 +39,19 @@ class CashDrawer
 		:prints
 	)
 	
-	Total = Struct.new( :date, :dtotal, :onhand, :payable )
+	Total = Struct.new( :date, :dtotal, :onhand, :payable, :diff )
 	
 	attr_accessor :totals
 	attr_accessor :ones, :fives, :tens, :twentys, :fiftys, :bennys
 	attr_accessor :penny, :nickel, :dime, :quarter
 	attr_accessor :checks, :petty, :bank, :mvdue, :cbag
 	attr_accessor :office, :copy, :motors, :guns, :prints
-	attr_accessor :date, :dtotal, :onhand, :payable, :dt
+	attr_accessor :date, :dtotal, :onhand, :payable, :diff
 	
 
 	def initialize
 		@totals = [
-			Total.new('2024-11-23', '$17.99', '$534.88', '$18.37')
+			Total.new('2024-11-23', '$17.99', '$534.88', '$1899.37', '$1364.49' )
 		]
 	end
 	
@@ -82,7 +82,7 @@ class CashDrawer
 			about_menu_item {
 				on_clicked do
 					msg_box('Cash Drawer',
-						"A custom payablep for balance input
+						"A custom app for balance input
 						
 						Developed by Joseph Lane using Ruby and Glimmer
 						Cash Drawer - \u{00A9} 2024")
@@ -96,224 +96,357 @@ class CashDrawer
 		file_menu
 		help_menu
 	
-		window('Cash Drawer', 400, 300, has_menubar = true) {
+		window('Cash Drawer', 700, 455, has_menubar = true) {
 			margined true
+			resizable false
 			
 			tab {
 				tab_item('Funds') {
 				
 					vertical_box {
-						horizontal_box {
-						
-							group {
-								stretchy false
-								vertical_box {
-									form {
-										stretchy false
-
-										date_picker {
-											label 'Date'
-											time <=> [self, :date]
-											@date = "#{Time.now.year}-#{'%02d' % Time.now.month}-#{'%02d' % Time.now.day}"
-											on_changed do
-												@date = "#{date[:year]}-#{'%02d' % date[:mon]}-#{'%02d' % date[:mday]}"
-											end
-										}
-										
-										
-										entry {
-											@penny = '0'
-											label 'Pennies'
-											text <=> [self, :penny]
-										}
-										
-										entry {
-											@nickel = '0'
-											label 'Nickels'
-											text <=> [self, :nickel]
-										}
-										
-										entry {
-											@dime = '0'
-											label 'Dimes'
-											text <=> [self, :dime]
-										}
-										
-										entry {
-											@quarter = '0'
-											label 'Quarters'
-											text <=> [self, :quarter]
-										}
-									}	
-								}
+					
+						grid {
+							
+							# Currency label fields
+							label('Date') {
+								left 0
+								top 0
+								halign :left
+								valign :center
 							}
 							
-							group{
-								stretchy false
-								vertical_box {
-									form {
-										stretchy false
-										
-										entry {
-											@ones = '0'
-											label 'Ones'
-											text <=> [self, :ones]
-										}
-										
-										entry {
-											@fives = '0'
-											label 'Fives'
-											text <=> [self, :fives]
-										}
-										
-										entry {
-											@tens = '0'
-											label 'Tens'
-											text <=> [self, :tens]
-										}
-										
-										entry {
-											@twentys = '0'
-											label 'Twentys'
-											text <=> [self, :twentys]
-										}
-										
-										entry {
-											@fiftys = '0'
-											label 'Fiftys'
-											text <=> [self, :fiftys]
-										}
-										
-										entry {
-											@bennys = '0'
-											label 'Hundreds'
-											text <=> [self, :bennys]
-										}
-									}	
-								}
-							}
-
-							group {
-								stretchy false
-								vertical_box {
-									form {
-										stretchy false
-										
-										entry {
-											@checks = '0'
-											label 'Checks'
-											text <=> [self, :checks]
-										}
-										
-										entry {
-											@bank = '0'
-											label 'Bank'
-											text <=> [self, :bank]
-										}
-										
-										entry {
-											@mvdue = '0'
-											label 'MV Due'
-											text <=> [self, :mvdue]
-										}
-										
-										entry {
-											@petty = '0'
-											label 'Petty Cash'
-											text <=> [self, :petty]
-										}
-										
-										entry {
-											@cbag = '0'
-											label 'Cash Bag'
-											text <=> [self, :cbag]
-										}
-									}
-								}
-							}
-						}
-						horizontal_box {
-							stretchy false
-							
-							group {
-								stretchy false
-							vertical_box {
-								form {
-									stretchy false
-									
-									entry {
-										@office = '0'
-										label 'Office'
-										text <=> [self, :office]
-									}
-									
-									entry {
-										@copy = '0'
-										label 'Copy'
-										text <=> [self, :copy]
-									}
-									
-									entry {
-										@motors = '0'
-										label 'Motors'
-										text <=> [self, :motors]
-									}
-									
-									entry {
-										@guns = '0'
-										label 'Firearms'
-										text <=> [self, :guns]
-									}
-									
-									entry {
-										@prints = '0'
-										label 'Prints'
-										text <=> [self, :prints]
-									}
-								}
-							}
+							label('Pennies') {
+								left 0
+								top 1
+								halign :left
+								valign :center
 							}
 							
-							vertical_box {
-								form {
-									stretchy false
-								}
+							label('Nickels') {
+								left 0
+								top 2
+								halign :left
+								valign :center
 							}
 							
-							
-							
-							vertical_box {
-								form {
-									stretchy false
-								}
-							
+							label('Dimes') {
+								left 0
+								top 3
+								halign :left
+								valign :center
 							}
-						}
-						
-						
-						horizontal_box {
 							
-							stretchy false
+							label('Quarters') {
+								left 0
+								top 4
+								halign :left
+								valign :center
+							}
 							
+							label('Ones') {
+								left 0
+								top 5
+								halign :left
+								valign :center
+							}
+							
+							label('Fives') {
+								left 0
+								top 6
+								halign :left
+								valign :center
+							}
+							
+							label('Tens') {
+								left 0
+								top 7
+								halign :left
+								valign :center
+							}
+							
+							label('Twentys') {
+								left 0
+								top 8
+								halign :left
+								valign :center
+							}
+							
+							label('Fiftys') {
+								left 0
+								top 9
+								halign :left
+								valign :center
+							}
+							
+							label('Hundreds') {
+								left 0
+								top 10
+								halign :left
+								valign :center
+							}
+							
+							date_picker {
+								left 1
+								top 0
+								hexpand true unless OS.mac?
+								time <=> [self, :date]
+								@date = "#{Time.now.year}-#{'%02d' % Time.now.month}-#{'%02d' % Time.now.day}"
+								on_changed do
+									@date = "#{date[:year]}-#{'%02d' % date[:mon]}-#{'%02d' % date[:mday]}"
+								end
+							}
+							
+							# Currency entry fields
+							entry {
+								left 1
+								top 1
+								hexpand true unless OS.mac?
+								@penny = '0'
+								text <=> [self, :penny]
+							}
+							
+							entry {
+								left 1
+								top 2
+								@nickel = '0'
+								text <=> [self, :nickel]
+							}
+							
+							entry {
+								left 1
+								top 3
+								@dime = '0'
+								text <=> [self, :dime]
+							}
+							
+							entry {
+								left 1
+								top 4
+								@quarter = '0'
+								text <=> [self, :quarter]
+							}
+							
+							entry {
+								left 1
+								top 5
+								@ones = '0'
+								text <=> [self, :ones]
+							}
+							
+							entry {
+								left 1
+								top 6
+								@fives = '0'
+								text <=> [self, :fives]
+							}
+							
+							entry {
+								left 1
+								top 7
+								@tens = '0'
+								text <=> [self, :tens]
+							}
+							
+							entry {
+								left 1
+								top 8
+								@twentys = '0'
+								text <=> [self, :twentys]
+							}
+							
+							entry {
+								left 1
+								top 9
+								@fiftys = '0'
+								text <=> [self, :fiftys]
+							}
+							
+							entry {
+								left 1
+								top 10
+								@bennys = '0'
+								text <=> [self, :bennys]
+							}
+							
+							# Accessory label fields
+							
+							label('Checks') {
+								left 2
+								top 1
+								halign :left
+								valign :center
+							}
+							
+							label('Bank Account') {
+								left 2
+								top 2
+								halign :left
+								valign :center
+							}
+							
+							label('Motors Due') {
+								left 2
+								top 3
+								halign :left
+								valign :center
+							}
+							
+							label('Petty Cash') {
+								left 2
+								top 4
+								halign :left
+								valign :center
+							}
+							
+							label('Cash Bag') {
+								left 2
+								top 5
+								halign :left
+								valign :center
+							}
+							
+							label('Office') {
+								left 2
+								top 6
+								halign :left
+								valign :center
+							}
+							
+							label('Copy Monies') {
+								left 2
+								top 7
+								halign :left
+								valign :center
+							}
+							
+							label('Motors') {
+								left 2
+								top 8
+								halign :left
+								valign :center
+							}
+							
+							label('Firearms') {
+								left 2
+								top 9
+								halign :left
+								valign :center
+							}
+							
+							label('Fingerprints') {
+								left 2
+								top 10
+								halign :left
+								valign :center
+							}
+							
+							# Accessory entry fields
+							entry {
+								left 3
+								top 1
+								hexpand true unless OS.mac?
+								@checks = '0'
+								text <=> [self, :checks]
+							}
+							
+							entry {
+								left 3
+								top 2
+								@bank = '0'
+								text <=> [self, :bank]
+							}
+							
+							entry {
+								left 3
+								top 3
+								@mvdue = '0'
+								text <=> [self, :mvdue]
+							}
+							
+							entry {
+								left 3
+								top 4
+								@petty = '0'
+								text <=> [self, :petty]
+							}
+							
+							entry {
+								left 3
+								top 5
+								@cbag = '0'
+								text <=> [self, :cbag]
+							}
+							
+							entry {
+								left 3
+								top 6
+								@office = '0'
+								text <=> [self, :office]
+							}
+							
+							entry {
+								left 3
+								top 7
+								@copy = '0'
+								text <=> [self, :copy]
+							}
+							
+							entry {
+								left 3
+								top 8
+								@motors = '0'
+								text <=> [self, :motors]
+							}
+							
+							entry {
+								left 3
+								top 9
+								@guns = '0'
+								text <=> [self, :guns]
+							}
+							
+							entry {
+								left 3
+								top 10
+								@prints = '0'
+								text <=> [self, :prints]
+							}
+							
+							# Submit button
 							button('Submit') {
-								stretchy false
+								left 3
+								top 11
 								
 								on_clicked do
-									@dtotal = BigDecimal(@penny) + BigDecimal(@nickel) + 
-										BigDecimal(@dime) + BigDecimal(@quarter) +
-										BigDecimal(@ones) + BigDecimal(@fives) + 
-										BigDecimal(@tens) + BigDecimal(@twentys) + 
-										BigDecimal(@fiftys) + BigDecimal(@bennys)
+									@dtotal = 	BigDecimal(@penny.tr('^0-9.', '')) +
+															BigDecimal(@nickel.tr('^0-9.', '')) +
+															BigDecimal(@dime.tr('^0-9.', '')) +
+															BigDecimal(@quarter.tr('^0-9.', '')) +
+															BigDecimal(@ones.tr('^0-9.', '')) +
+															BigDecimal(@fives.tr('^0-9.', '')) + 
+															BigDecimal(@tens.tr('^0-9.', '')) +
+															BigDecimal(@twentys.tr('^0-9.', '')) + 
+															BigDecimal(@fiftys.tr('^0-9.', '')) +
+															BigDecimal(@bennys.tr('^0-9.', ''))
 										
-									@onhand = BigDecimal(@checks) + BigDecimal(@bank) +
-										BigDecimal(@mvdue) + BigDecimal(@petty) + BigDecimal(@cbag)
+									@onhand = 	BigDecimal(@checks.tr('^0-9.', '')) +
+															BigDecimal(@bank.tr('^0-9.', '')) +
+															BigDecimal(@mvdue.tr('^0-9.', '')) +
+															BigDecimal(@petty.tr('^0-9.', '')) +
+															BigDecimal(@cbag.tr('^0-9.', ''))
 										
-									@payable = BigDecimal(@office) + BigDecimal(@copy) + 
-										BigDecimal(@motors) + BigDecimal(@guns) +
-										BigDecimal(@prints) + BigDecimal(@onhand)
+									@payable = 	BigDecimal(@office.tr('^0-9.', '')) +
+															BigDecimal(@petty.tr('^0-9.', '')) +
+															BigDecimal(@copy.tr('^0-9.', '')) +
+															BigDecimal(@motors.tr('^0-9.', '')) +
+															BigDecimal(@guns.tr('^0-9.', '')) +
+															BigDecimal(@prints.tr('^0-9.', ''))
+										
+									@diff = BigDecimal(@onhand) + BigDecimal(@dtotal) - BigDecimal(@payable)
 							
-									Total.new(@date, Money.from_amount(0), Money.from_amount(0), Money.from_amount(0))
-									@totals << Total.new(@date, Money.from_amount(@dtotal).format, Money.from_amount(@onhand).format, Money.from_amount(@payable).format)
+									Total.new(@date, Money.from_amount(0), Money.from_amount(0), Money.from_amount(0), Money.from_amount(0))
+									@totals << Total.new(@date, Money.from_amount(@dtotal).format, Money.from_amount(@onhand).format,
+										Money.from_amount(@payable).format, Money.from_amount(@diff).format)
 									msg_box('Notice', 'Values have been added to the ledger.')
 								end
 							}
@@ -327,6 +460,7 @@ class CashDrawer
 						text_column('Dtotal')
 						text_column('Onhand')
 						text_column('Payable')
+						text_column('Diff')
 
 						cell_rows <=> [self, :totals]
 					}
