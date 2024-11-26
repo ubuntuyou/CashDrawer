@@ -39,14 +39,14 @@ class CashDrawer
 		:prints
 	)
 	
-	Total = Struct.new( :date, :dtotal, :onhand, :ap )
+	Total = Struct.new( :date, :dtotal, :onhand, :payable )
 	
 	attr_accessor :totals
 	attr_accessor :ones, :fives, :tens, :twentys, :fiftys, :bennys
 	attr_accessor :penny, :nickel, :dime, :quarter
 	attr_accessor :checks, :petty, :bank, :mvdue, :cbag
 	attr_accessor :office, :copy, :motors, :guns, :prints
-	attr_accessor :date, :dtotal, :onhand, :ap, :dt
+	attr_accessor :date, :dtotal, :onhand, :payable, :dt
 	
 
 	def initialize
@@ -82,7 +82,7 @@ class CashDrawer
 			about_menu_item {
 				on_clicked do
 					msg_box('Cash Drawer',
-						"A custom app for balance input
+						"A custom payablep for balance input
 						
 						Developed by Joseph Lane using Ruby and Glimmer
 						Cash Drawer - \u{00A9} 2024")
@@ -290,53 +290,34 @@ class CashDrawer
 							}
 						}
 						
-						#group {
-						#	stretchy false
+						
+						horizontal_box {
 							
-						#	vertical_box {
+							stretchy false
+							
+							button('Submit') {
+								stretchy false
 								
+								on_clicked do
+									@dtotal = BigDecimal(@penny) + BigDecimal(@nickel) + 
+										BigDecimal(@dime) + BigDecimal(@quarter) +
+										BigDecimal(@ones) + BigDecimal(@fives) + 
+										BigDecimal(@tens) + BigDecimal(@twentys) + 
+										BigDecimal(@fiftys) + BigDecimal(@bennys)
+										
+									@onhand = BigDecimal(@checks) + BigDecimal(@bank) +
+										BigDecimal(@mvdue) + BigDecimal(@petty) + BigDecimal(@cbag)
+										
+									@payable = BigDecimal(@office) + BigDecimal(@copy) + 
+										BigDecimal(@motors) + BigDecimal(@guns) +
+										BigDecimal(@prints) + BigDecimal(@onhand)
 							
-								horizontal_box {
-									#form {
-										stretchy false
-										
-										button('Calculate') {
-											stretchy false
-											
-											on_clicked do
-												@dtotal = BigDecimal(@penny) + BigDecimal(@nickel) + 
-													BigDecimal(@dime) + BigDecimal(@quarter) +
-													BigDecimal(@ones) + BigDecimal(@fives) + 
-													BigDecimal(@tens) + BigDecimal(@twentys) + 
-													BigDecimal(@fiftys) + BigDecimal(@bennys)
-													
-												@onhand = BigDecimal(@checks) + BigDecimal(@bank) +
-													BigDecimal(@mvdue) + BigDecimal(@petty) + BigDecimal(@cbag)
-													
-												@ap = 
-												
-												p Money.from_amount(@onhand).format
-												p Money.from_amount(@dtotal).format
-												p Money.from_amount(@ap).format
-											end
-										}
-										
-										button('Submit') {
-											stretchy false
-											
-											on_clicked do
-												if @onhand.nil? then @onhand = "0.00" end
-												if @dtotal.nil? then @dtotal = "0.00" end
-												if @ap.nil? then @ap = "0.00" end
-												
-												@totals << Total.new(@date, Money.from_amount(@dtotal).format, Money.from_amount(@onhand).format, @ap)
-												msg_box('Notice', 'Values have been added to the ledger.')
-											end
-										}
-									#}
-								}
-							#}
-						#}
+									Total.new(@date, Money.from_amount(0), Money.from_amount(0), Money.from_amount(0))
+									@totals << Total.new(@date, Money.from_amount(@dtotal).format, Money.from_amount(@onhand).format, Money.from_amount(@payable).format)
+									msg_box('Notice', 'Values have been added to the ledger.')
+								end
+							}
+						}
 					}
 				}
 				
@@ -345,7 +326,7 @@ class CashDrawer
 						text_column('Date') {editable true}
 						text_column('Dtotal')
 						text_column('Onhand')
-						text_column('Ap')
+						text_column('Payable')
 
 						cell_rows <=> [self, :totals]
 					}
