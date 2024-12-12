@@ -21,6 +21,10 @@ wxTextCtrl* entry[19];
 wxDouble value[19];
 wxDatePickerCtrl* picker;
 wxString date;
+wxString current_line;
+size_t line_count;
+size_t line;
+wxStringTokenizer tokenizer;
 
 enum IDs {
 	CALCULATE = 2,
@@ -62,20 +66,20 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	file.Open();
 
 	wxString token;
-	wxStringTokenizer tokenizer(file.GetFirstLine(), ",");
-	while (tokenizer.HasMoreTokens()) {
-		token += (tokenizer.GetNextToken() + ",");
+	tokenizer.SetString(file.GetFirstLine(), ",");
+	line_count = file.GetLineCount();
+	
 
+	for (line = file.GetCurrentLine(); line < line_count; line++) {
+		
+		while (tokenizer.HasMoreTokens()) {
+			token += (tokenizer.GetNextToken() + ",");
+		}
+		file.AddLine(token);
+		token = "";
+
+		tokenizer.SetString(file.GetNextLine());
 	}
-	file.AddLine(token);
-	token = "";
-
-	wxStringTokenizer tokenizer2(file.GetNextLine(), ",");
-	while (tokenizer2.HasMoreTokens()) {
-		token += (tokenizer2.GetNextToken() + ",");
-
-	}
-	file.AddLine(token);
 
 	file.Write();
 	file.Close();
