@@ -14,7 +14,7 @@
 #define DIFFER_LABEL 26
 #define DIFFER_TOTAL 27
 
-std::string fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints"};
+std::string fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
 
 wxStaticText* label[28];
 wxTextCtrl* entry[19];
@@ -30,9 +30,9 @@ enum IDs {
 
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
-	EVT_BUTTON(CALCULATE, MainFrame::OnCalculateClicked)
-	EVT_BUTTON(SUBMIT, MainFrame::OnSubmitClicked)
-	EVT_DATE_CHANGED(DPICKER, MainFrame::OnDateChanged)
+EVT_BUTTON(CALCULATE, MainFrame::OnCalculateClicked)
+EVT_BUTTON(SUBMIT, MainFrame::OnSubmitClicked)
+EVT_DATE_CHANGED(DPICKER, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
@@ -65,7 +65,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	wxStringTokenizer tokenizer(file.GetFirstLine(), ",");
 	while (tokenizer.HasMoreTokens()) {
 		token += (tokenizer.GetNextToken() + ",");
-		
+
 	}
 	file.AddLine(token);
 	token = "";
@@ -73,10 +73,10 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	wxStringTokenizer tokenizer2(file.GetNextLine(), ",");
 	while (tokenizer2.HasMoreTokens()) {
 		token += (tokenizer2.GetNextToken() + ",");
-		
+
 	}
 	file.AddLine(token);
-	
+
 	file.Write();
 	file.Close();
 
@@ -91,7 +91,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 		gsizer1->Add(label[i], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 		gsizer1->Add(entry[i], 0, wxEXPAND);
 	}
-	
+
 	for (int i = 10; i < 19; i++) {
 		if (i == 15) {
 			gsizer2->AddSpacer(23);
@@ -113,17 +113,17 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	label[DIFFER_TOTAL] = new wxStaticText(right_panel, wxID_ANY, " ");
 
 	gsizer1->Add(label[DRAWER_LABEL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
-	gsizer1->Add(label[DRAWER_TOTAL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);	
+	gsizer1->Add(label[DRAWER_TOTAL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer1->Add(label[ONHAND_LABEL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer1->Add(label[ONHAND_TOTAL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer2->Add(label[ACTPAY_LABEL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer2->Add(label[ACTPAY_TOTAL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer2->Add(label[DIFFER_LABEL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer2->Add(label[DIFFER_TOTAL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
-	
+
 	wxButton* calculate_button = new wxButton(button_panel, CALCULATE, "Calculate");
 	wxButton* submit_button = new wxButton(button_panel, SUBMIT, "Submit");
-	
+
 
 	// Adding stuff to things
 
@@ -137,12 +137,12 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	bsizer->AddSpacer(23);
 	bsizer->AddSpacer(23);
 	bsizer->Add(submit_button, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
-	
+
 	date_panel->SetSizer(dsizer);
 	left_panel->SetSizer(gsizer1);
 	right_panel->SetSizer(gsizer2);
 	button_panel->SetSizer(bsizer);
-	
+
 	main_sizer->Add(date_sizer, 0, wxEXPAND | wxALL);
 	main_sizer->Add(entry_sizer, 0, wxEXPAND | wxALL);
 	main_sizer->Add(button_sizer, 0, wxEXPAND | wxALL);
@@ -151,7 +151,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	entry_sizer->Add(left_panel, 1, wxEXPAND | wxALL, FromDIP(10));
 	entry_sizer->Add(right_panel, 1, wxEXPAND | wxALL, FromDIP(10));
 	button_sizer->Add(button_panel, 0, wxEXPAND | wxALL, FromDIP(10));
- 
+
 	main_panel->SetSizer(main_sizer);
 	main_sizer->Fit(this);
 

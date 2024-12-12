@@ -1,4 +1,5 @@
-.DS_Store
-.vs
 Debug
+x64
+.vs
+.DS_Store
 wxWidgets
