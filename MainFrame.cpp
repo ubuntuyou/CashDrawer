@@ -44,7 +44,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	wxBoxSizer* button_sizer = new wxBoxSizer(wxVERTICAL);
 	wxFlexGridSizer* gsizer1 = new wxFlexGridSizer(13, 2, 10, 8);
 	wxFlexGridSizer* gsizer2 = new wxFlexGridSizer(13, 2, 10, 8);
-	wxFlexGridSizer* bsizer = new wxFlexGridSizer(1, 4, 5, 8);
+	wxFlexGridSizer* bsizer = new wxFlexGridSizer(1, 4, 10, 10);
 	wxFlexGridSizer* dsizer = new wxFlexGridSizer(1, 2, 10, 10);
 
 	wxPanel* main_panel = new wxPanel(this);
@@ -52,6 +52,9 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	wxPanel* left_panel = new wxPanel(main_panel);
 	wxPanel* right_panel = new wxPanel(main_panel);
 	wxPanel* button_panel = new wxPanel(main_panel);
+
+
+	// Testing with wxTextFile and wxStringTokenizer
 
 	wxTextFile file(wxT("file.csv"));
 	if (!file.Exists())
