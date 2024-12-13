@@ -1,6 +1,7 @@
 #pragma once
 #include <wx/wx.h>
 #include <wx/dateevt.h>
+#include <wx/vector.h>
 
 
 
