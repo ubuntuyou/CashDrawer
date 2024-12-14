@@ -73,8 +73,9 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	picker = new wxDatePickerCtrl(date_panel, DPICKER, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DROPDOWN);
 	
 
-	// Open file and add date entries to array
+	// Open file and add date entries to vector
 
+	// This check really should happen on clicking Submit so as to utilize the selected date
 	if (!file.Exists())
 		file.Create();
 	file.Open();
@@ -216,33 +217,45 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 }
 
 void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
+	bool date_exists = false;
+	int i;
+
+	if (!file.Open())
+		file.Open();
 
 	// Need to push new date to vector change line_count
 
-	for (int i = 0; i < line_count; i++) {
-		if (entry_dates[i] == date) {
-			line = i;
-			date = entry_dates[i];
-			wxMessageBox("Entry exists for date");
-			break;
-		}
-		else {
-			file.AddLine(new_line);
-			wxLogStatus("Data saved to file.");
-		}
+	for (i = 0; i < line_count; i++) {
+		if (entry_dates[i] == date)
+			date_exists = true;
 	}
 
-	
+	if (date_exists) {
+		line = i;
+		wxMessageBox("Entry exists for date");
+
+		// Need to make overwrite confirmation
+		// If overwrite confirmed then insert new line and delete the old one
+		// Maybe sort entries by date by pushing them all to a vector and sorting 
+		// before clearing file and rewriting from vector
+	}
+	else {
+		file.AddLine(new_line);
+		entry_dates.push_back(date);
+		line_count = file.GetLineCount();
+		wxLogStatus("Data saved to file.");
+	}
 
 	file.Write();
 	file.Close();
-
-	
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& evt) {
 	date = picker->GetValue().Format("%m-%d-%Y");
 	wxLogStatus("Date Changed to " + picker->GetValue().Format("%m-%d-%Y"));
+
+	// Need to check if date exists and if so, load its values for editing
+
 }
 
 /*
