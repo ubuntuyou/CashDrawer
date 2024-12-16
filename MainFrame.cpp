@@ -2,7 +2,9 @@
 #include <wx/wx.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
+#include <wx/filename.h>
 #include <wx/textfile.h>
+#include <wx/file.h>
 #include <wx/tokenzr.h>
 #include <wx/vector.h>
 
@@ -17,14 +19,14 @@
 
 std::string fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
 
-wxVector<wxString> entry_dates;
+wxVector<wxString> entryDates;
 wxStaticText* label[28];
 wxTextCtrl* entry[19];
 wxDouble value[19];
 wxDatePickerCtrl* picker;
 wxString date;
-wxString new_line;
-size_t line_count;
+wxString newLine;
+size_t lineCount;
 size_t line;
 wxStringTokenizer tokenizer;
 wxTextFile file(wxDateTime::Today().Format("%Y_%m") + ".csv");
@@ -44,35 +46,37 @@ EVT_DATE_CHANGED(DPICKER, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
+	
+
 	this->SetMinClientSize(wxSize(325, 525));
 	this->SetMaxClientSize(wxSize(325, 525));
 
-	wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
-	wxBoxSizer* date_sizer = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* entry_sizer = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* button_sizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* dateSizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* entrySizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* buttonSizer = new wxBoxSizer(wxVERTICAL);
 	wxFlexGridSizer* gsizer1 = new wxFlexGridSizer(13, 2, 10, 8);
 	wxFlexGridSizer* gsizer2 = new wxFlexGridSizer(13, 2, 10, 8);
 	wxFlexGridSizer* bsizer = new wxFlexGridSizer(1, 4, 10, 10);
 	wxFlexGridSizer* dsizer = new wxFlexGridSizer(1, 2, 10, 10);
 
-	wxPanel* main_panel = new wxPanel(this);
-	wxPanel* date_panel = new wxPanel(main_panel);
-	wxPanel* left_panel = new wxPanel(main_panel);
-	wxPanel* right_panel = new wxPanel(main_panel);
-	wxPanel* button_panel = new wxPanel(main_panel);
+	wxPanel* mainPanel = new wxPanel(this);
+	wxPanel* datePanel = new wxPanel(mainPanel);
+	wxPanel* leftPanel = new wxPanel(mainPanel);
+	wxPanel* rightPanel = new wxPanel(mainPanel);
+	wxPanel* buttonPanel = new wxPanel(mainPanel);
 
 /*
-	main_panel->SetBackgroundColour(wxColour(100, 100, 100));
-	date_panel->SetBackgroundColour(wxColour(150, 150, 150));
-	button_panel->SetBackgroundColour(wxColour(150, 150, 150));
-	left_panel->SetBackgroundColour(wxColour(150, 150, 150));
-	right_panel->SetBackgroundColour(wxColour(150, 150, 150));
+	mainPanel->SetBackgroundColour(wxColour(100, 100, 100));
+	datePanel->SetBackgroundColour(wxColour(150, 150, 150));
+	buttonPanel->SetBackgroundColour(wxColour(150, 150, 150));
+	leftPanel->SetBackgroundColour(wxColour(150, 150, 150));
+	rightPanel->SetBackgroundColour(wxColour(150, 150, 150));
 */
 
-	picker = new wxDatePickerCtrl(date_panel, DPICKER, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DROPDOWN);
+	picker = new wxDatePickerCtrl(datePanel, DPICKER, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DROPDOWN);
 	
-
+	/*
 	// Open file and add date entries to vector
 
 	// This check really should happen on clicking Submit so as to utilize the selected date
@@ -81,20 +85,20 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	file.Open();
 
 	tokenizer.SetString(file.GetFirstLine(), ",");
-	line_count = file.GetLineCount();
+	lineCount = file.GetLineCount();
 
 	// Push date from each line to vector
 
-	for (int i = file.GetCurrentLine(); i < line_count; i++) {
-		entry_dates.push_back(tokenizer.GetNextToken());
+	for (int i = file.GetCurrentLine(); i < lineCount; i++) {
+		entryDates.push_back(tokenizer.GetNextToken());
 		tokenizer.SetString(file.GetNextLine());
 	}
-	
+	*/
 	// Creating the layout
 
 	for (int i = 0; i < 10; i++) {
-		label[i] = new wxStaticText(left_panel, wxID_ANY, fields[i]);
-		entry[i] = new wxTextCtrl(left_panel, wxID_ANY, "0.00", wxDefaultPosition, wxSize(50, 23), wxTE_RIGHT, wxTextValidator(wxFILTER_NUMERIC));
+		label[i] = new wxStaticText(leftPanel, wxID_ANY, fields[i]);
+		entry[i] = new wxTextCtrl(leftPanel, wxID_ANY, "0.00", wxDefaultPosition, wxSize(50, 23), wxTE_RIGHT, wxTextValidator(wxFILTER_NUMERIC));
 		gsizer1->Add(label[i], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 		gsizer1->Add(entry[i], 0, wxEXPAND);
 	}
@@ -104,20 +108,20 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 			gsizer2->AddSpacer(23);
 			gsizer2->AddSpacer(23);
 		}
-		label[i] = new wxStaticText(right_panel, wxID_ANY, fields[i]);
-		entry[i] = new wxTextCtrl(right_panel, wxID_ANY, "0.00", wxDefaultPosition, wxSize(50, 23), wxTE_RIGHT, wxTextValidator(wxFILTER_NUMERIC));
+		label[i] = new wxStaticText(rightPanel, wxID_ANY, fields[i]);
+		entry[i] = new wxTextCtrl(rightPanel, wxID_ANY, "0.00", wxDefaultPosition, wxSize(50, 23), wxTE_RIGHT, wxTextValidator(wxFILTER_NUMERIC));
 		gsizer2->Add(label[i], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 		gsizer2->Add(entry[i], 0, wxEXPAND);
 	}
 
-	label[DRAWER_LABEL] = new wxStaticText(left_panel, wxID_ANY, "Drawer:");
-	label[DRAWER_TOTAL] = new wxStaticText(left_panel, wxID_ANY, " ");
-	label[ONHAND_LABEL] = new wxStaticText(left_panel, wxID_ANY, "On Hand:");
-	label[ONHAND_TOTAL] = new wxStaticText(left_panel, wxID_ANY, " ");
-	label[ACTPAY_LABEL] = new wxStaticText(right_panel, wxID_ANY, "Payable:");
-	label[ACTPAY_TOTAL] = new wxStaticText(right_panel, wxID_ANY, " ");
-	label[DIFFER_LABEL] = new wxStaticText(right_panel, wxID_ANY, "Difference:");
-	label[DIFFER_TOTAL] = new wxStaticText(right_panel, wxID_ANY, " ");
+	label[DRAWER_LABEL] = new wxStaticText(leftPanel, wxID_ANY, "Drawer:");
+	label[DRAWER_TOTAL] = new wxStaticText(leftPanel, wxID_ANY, " ");
+	label[ONHAND_LABEL] = new wxStaticText(leftPanel, wxID_ANY, "On Hand:");
+	label[ONHAND_TOTAL] = new wxStaticText(leftPanel, wxID_ANY, " ");
+	label[ACTPAY_LABEL] = new wxStaticText(rightPanel, wxID_ANY, "Payable:");
+	label[ACTPAY_TOTAL] = new wxStaticText(rightPanel, wxID_ANY, " ");
+	label[DIFFER_LABEL] = new wxStaticText(rightPanel, wxID_ANY, "Difference:");
+	label[DIFFER_TOTAL] = new wxStaticText(rightPanel, wxID_ANY, " ");
 
 	gsizer1->Add(label[DRAWER_LABEL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer1->Add(label[DRAWER_TOTAL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
@@ -128,8 +132,8 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	gsizer2->Add(label[DIFFER_LABEL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 	gsizer2->Add(label[DIFFER_TOTAL], 0, wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT);
 
-	wxButton* calculate_button = new wxButton(button_panel, CALCULATE, "Calculate");
-	wxButton* submit_button = new wxButton(button_panel, SUBMIT, "Submit");
+	wxButton* calculateButton = new wxButton(buttonPanel, CALCULATE, "Calculate");
+	wxButton* submitButton = new wxButton(buttonPanel, SUBMIT, "Submit");
 
 
 	// Adding stuff to things
@@ -143,33 +147,33 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 
 	// Add buttons and spacers to button sizer
 	bsizer->AddGrowableCol(1, 1);
-	bsizer->Add(calculate_button, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
+	bsizer->Add(calculateButton, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 	bsizer->AddSpacer(23);
 	bsizer->AddSpacer(23);
-	bsizer->Add(submit_button, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
+	bsizer->Add(submitButton, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 
 	// Set sizers for the various panels
 	// This is what makes the panels grow with the sizers
-	date_panel->SetSizer(dsizer);
-	left_panel->SetSizer(gsizer1);
-	right_panel->SetSizer(gsizer2);
-	button_panel->SetSizer(bsizer);
+	datePanel->SetSizer(dsizer);
+	leftPanel->SetSizer(gsizer1);
+	rightPanel->SetSizer(gsizer2);
+	buttonPanel->SetSizer(bsizer);
 
 	// Add panels to various sizers
-	date_sizer->Add(date_panel, 1, wxEXPAND | wxALL, FromDIP(10));
-	entry_sizer->Add(left_panel, 1, wxEXPAND | wxALL, FromDIP(10));
-	entry_sizer->Add(right_panel, 1, wxEXPAND | wxALL, FromDIP(10));
-	button_sizer->Add(button_panel, 1, wxEXPAND | wxALL, FromDIP(10));
+	dateSizer->Add(datePanel, 1, wxEXPAND | wxALL, FromDIP(10));
+	entrySizer->Add(leftPanel, 1, wxEXPAND | wxALL, FromDIP(10));
+	entrySizer->Add(rightPanel, 1, wxEXPAND | wxALL, FromDIP(10));
+	buttonSizer->Add(buttonPanel, 1, wxEXPAND | wxALL, FromDIP(10));
 
 	// Add sizers to the main panel
-	main_sizer->Add(date_sizer, 0, wxEXPAND | wxALL);
-	main_sizer->Add(entry_sizer, 0, wxEXPAND | wxALL);
-	main_sizer->Add(button_sizer, 0, wxEXPAND | wxALL);
+	mainSizer->Add(dateSizer, 0, wxEXPAND | wxALL);
+	mainSizer->Add(entrySizer, 0, wxEXPAND | wxALL);
+	mainSizer->Add(buttonSizer, 0, wxEXPAND | wxALL);
 
 	// Set sizer for main panel
 	// This is what makes the main panel change size with the window
-	main_panel->SetSizer(main_sizer);
-	main_sizer->Fit(this);
+	mainPanel->SetSizer(mainSizer);
+	mainSizer->Fit(this);
 
 	CreateStatusBar();
 
@@ -181,7 +185,9 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 	wxDouble payable = 0;
 	wxDouble difference = 0;
 
-	new_line = "";
+	
+
+	newLine = "";
 	date = picker->GetValue().Format("%m-%d-%Y");
 
 	// Get values from entries
@@ -192,46 +198,79 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 	for (int i = 0; i < 10; i++)
 		drawer += value[i];
 	label[DRAWER_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), drawer));
-	new_line += (date + wxString::Format(wxT(",$%.2f"), drawer));
+	newLine += (date + wxString::Format(wxT(",$%.2f"), drawer));
 
 	// On Hand
 	onhand = drawer;
 	for (int i = 10; i < 15; i++)
 		onhand += value[i];
 	label[ONHAND_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), onhand));
-	new_line += (wxString::Format(wxT(",$%.2f"), onhand));
+	newLine += (wxString::Format(wxT(",$%.2f"), onhand));
 
 	// Accounts Payable
 	payable = value[12] + value[13];
 	for (int i = 15; i < 19; i++)
 		payable += value[i];
 	label[ACTPAY_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), payable));
-	new_line += (wxString::Format(wxT(",$%.2f"), payable));
+	newLine += (wxString::Format(wxT(",$%.2f"), payable));
 
 	// Difference between Money on Hand and Accounts Payable
 	difference = (onhand >= payable) ? (onhand - payable) : (payable - onhand);
 	label[DIFFER_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), difference));
-	new_line += (wxString::Format(wxT(",$%.2f"), difference));
+	newLine += (wxString::Format(wxT(",$%.2f"), difference));
 
-	wxLogStatus(new_line);
+	wxLogStatus(newLine);
 }
 
 void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
-	bool date_exists = false;
+	bool dateExists = false;
 	int i;
 
+	// Need to make sure file name matches year and month of entry
+	// If not then we need to create a new file
+
+	//wxFilenName newFile(picker->GetValue().Format("%Y_%m.csv"));
+
+	wxString file1 = file.GetName();
+	//wxString file2 = newFile.GetFullName();
+
+	if (file.GetName() != picker->GetValue().Format("%Y_%m.csv")) {
+		if (file.IsOpened()) {
+			//file.Write();
+			file.Close();
+		}
+		
+		wxTextFile file(picker->GetValue().Format("%Y_%m.csv"));
+		file.Create();
+		file.Open();
+
+		wxLogMessage(file.GetName());
+
+		//wxLogMessage();
+	}
+	
+	if (!file.Exists())
+		file.Create();
 	if (!file.Open())
 		file.Open();
 
-	// Need to push new date to vector change line_count
+	tokenizer.SetString(file.GetFirstLine(), ",");
+	lineCount = file.GetLineCount();
 
-	for (i = 0; i < line_count; i++) {
-		if (entry_dates[i] == date)
-			date_exists = true;
+	// Push date from each line to vector
+
+	for (int i = file.GetCurrentLine(); i < lineCount; i++) {
+		entryDates.push_back(tokenizer.GetNextToken());
+		tokenizer.SetString(file.GetNextLine());
 	}
 
-	if (date_exists) {
-		line = i;
+	for (i = 0; i < lineCount; i++) {
+		if (entryDates[i] == date)
+			dateExists = true;
+	}
+
+	if (dateExists) {
+		line = i;	// Use for overwrite of existing line
 		wxMessageBox("Entry exists for date");
 
 		// Need to make overwrite confirmation
@@ -240,14 +279,15 @@ void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
 		// before clearing file and rewriting from vector
 	}
 	else {
-		file.AddLine(new_line);
-		entry_dates.push_back(date);
-		line_count = file.GetLineCount();
+		file.AddLine(newLine);
+		entryDates.push_back(date);
+		lineCount = file.GetLineCount();
+		file.Write();
+		file.Close();
 		wxLogStatus("Data saved to file.");
 	}
 
-	file.Write();
-	file.Close();
+	
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& evt) {
@@ -260,11 +300,11 @@ void MainFrame::OnDateChanged(wxDateEvent& evt) {
 
 /*
 	tokenizer.SetString(file.GetFirstLine(), ",");
-	line_count = file.GetLineCount();
+	lineCount = file.GetLineCount();
 
 	wxString token;
 
-	for (line = file.GetCurrentLine(); line < line_count; line++) {
+	for (line = file.GetCurrentLine(); line < lineCount; line++) {
 
 		while (tokenizer.HasMoreTokens()) {
 			token += (tokenizer.GetNextToken() + ",");
