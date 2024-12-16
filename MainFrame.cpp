@@ -29,7 +29,7 @@ wxString newLine;
 size_t lineCount;
 size_t line;
 wxStringTokenizer tokenizer;
-wxTextFile file(wxDateTime::Today().Format("%Y_%m") + ".csv");
+wxTextFile file(wxDateTime::Today().Format("%Y.csv"));
 
 
 enum IDs {
@@ -226,33 +226,15 @@ void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
 	bool dateExists = false;
 	int i;
 
-	// Need to make sure file name matches year and month of entry
-	// If not then we need to create a new file
-
-	//wxFilenName newFile(picker->GetValue().Format("%Y_%m.csv"));
-
-	wxString file1 = file.GetName();
-	//wxString file2 = newFile.GetFullName();
-
-	if (file.GetName() != picker->GetValue().Format("%Y_%m.csv")) {
-		if (file.IsOpened()) {
-			//file.Write();
-			file.Close();
-		}
-		
-		wxTextFile file(picker->GetValue().Format("%Y_%m.csv"));
-		file.Create();
-		file.Open();
-
-		wxLogMessage(file.GetName());
-
-		//wxLogMessage();
-	}
 	
-	if (!file.Exists())
+	if (!file.Exists()) {
 		file.Create();
-	if (!file.Open())
+		wxMessageBox("Created");
+	}
+	if (!file.Open()) {
 		file.Open();
+		wxMessageBox("Opened");
+	}
 
 	tokenizer.SetString(file.GetFirstLine(), ",");
 	lineCount = file.GetLineCount();
@@ -261,7 +243,8 @@ void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
 
 	for (int i = file.GetCurrentLine(); i < lineCount; i++) {
 		entryDates.push_back(tokenizer.GetNextToken());
-		tokenizer.SetString(file.GetNextLine());
+		wxLogStatus(entryDates[i]);
+		tokenizer.SetString(file.GetNextLine(), ",");
 	}
 
 	for (i = 0; i < lineCount; i++) {
