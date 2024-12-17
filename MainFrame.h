@@ -12,6 +12,7 @@ private:
 	void OnCalculateClicked(wxCommandEvent& evt);
 	void OnSubmitClicked(wxCommandEvent& evt);
 	void OnDateChanged(wxDateEvent& evt);
+	void CheckDateExists();
 	wxDECLARE_EVENT_TABLE();
 };
 
