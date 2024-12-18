@@ -46,6 +46,7 @@ EVT_BUTTON(SUBMIT, MainFrame::OnSubmitClicked)
 EVT_DATE_CHANGED(DPICKER, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
 
+
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
 	this->SetMinClientSize(wxSize(325, 525));
 	this->SetMaxClientSize(wxSize(325, 525));
