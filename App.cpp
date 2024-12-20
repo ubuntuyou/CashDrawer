@@ -10,6 +10,6 @@ bool App::OnInit() {
 	ChildFrame* childFrame = new ChildFrame("Child Frame");
 	mainFrame->Center();
 	mainFrame->Show();
-	childFrame->Show();
+	//childFrame->Show();
 	return true;
 }

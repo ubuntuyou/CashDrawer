@@ -1,4 +1,6 @@
 #include "MainFrame.h"
+#include <iostream>
+#include <fstream>
 #include <wx/wx.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
@@ -30,6 +32,7 @@ size_t lineCount;
 size_t line;
 wxStringTokenizer tokenizer;
 wxTextFile file(wxDateTime::Today().Format("%Y.csv"));
+wxTextFile xetex(wxDateTime::Today().Format("%Y.tex"));
 wxButton* submitButton;
 wxButton* calculateButton;
 bool dateExists;
@@ -259,6 +262,9 @@ void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
 			label[ACTPAY_TOTAL]->SetLabel(tokenizer.GetNextToken());
 			label[DIFFER_TOTAL]->SetLabel(tokenizer.GetNextToken());
 		}
+		
+		ShellExecute(NULL, L"open", L".\\XeLaTeX\\tectonic.exe", L".\\XeLaTeX\\CashDrawer.tex", NULL, SW_HIDE);
+		ShellExecute(NULL, L"open", L".\\XeLaTeX\\CashDrawer.pdf", NULL, NULL, SW_SHOW);
 	}
 }
 
