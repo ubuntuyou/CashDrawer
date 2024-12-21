@@ -3,72 +3,53 @@
 \usepackage{array}
 \pagenumbering{gobble}
 \setmainfont{Consolas}
-
 \title{Balance Input Report}
-\author{Lincoln County Sheriff's Office \\ North Platte Nebraska}
-
+\author{%s \\ %s}
+\date{%s}
 \begin{document}
-
 \maketitle
-
 \begin{multicols}{2}
 \begin{tabular}{lr}
 \multicolumn{2}{c}{\textbf{Cash Drawer}} \\
-Pennies & 0.25 \\
-Nickels & 0.50 \\
-Dimes & 1.50 \\
-Quarters & 3.75 \\
-Ones & 19.00 \\
-Fives & 35.00 \\
-Tens & 80.00 \\
-Twenties & 60.00 \\
-Fifties & 0.00 \\
-Hundreds & 0.00 \\
- & \\
-\hline
-Total & 200.00 \\
- & \\
- & \\
- & \\
+Pennies & %.2f \\
+Nickels & %.2f \\
+Dimes & %.2f \\
+Quarters & %.2f \\
+Ones & %.2f \\
+Fives & %.2f \\
+Tens & %.2f \\
+Twenties & %.2f \\
+Fifties & %.2f \\
+Hundreds & %.2f \\
+ & \\ \hline
+Total & %.2f \\
+ & \\ & \\ & \\
 \multicolumn{2}{c}{\textbf{On Hand}} \\
-Checks & 7.00 \\
-Bank Acct & 3028.67 \\
-M.V. Due & 150.00 \\
-On Hand & 49.65 \\
-Cash Bag & 74.00 \\
- & \\
-\hline
-Total & 3309.30 \\
+Checks & %.2f \\
+Bank Acct & %.2f \\
+M.V. Due & %.2f \\
+Petty Cash & %.2f \\
+Cash Bag & %.2f \\
+ & \\ \hline
+Total & %.2f \\
 \end{tabular}
 
 \begin{tabular}{lr}
 \multicolumn{2}{c}{\textbf{Accounts Payable}} \\
-Office & 458.50\\
-Petty Cash & 49.65\\
-Copy Monies & 33.00\\
-Motor Vehicle & 150.00\\
-Firearms & 160.00 \\
-Fingerprints & 124.00 \\
+Office & %.2f \\
+Petty Cash & %.2f \\
+Copy Monies & %.2f \\
+Motor Vehicle & %.2f \\
+Firearms & %.2f \\
+Fingerprints & %.2f \\
+ & \\ \hline
+Total & %.2f \\
+ & \\ & \\ & \\ & \\ & \\ & \\ & \\ & \\ & \\ & \\
+On Hand & %.2f \\
  & \\
-\hline
-Total & 975.15 \\
- & \\
- & \\
- & \\
- & \\
- & \\
- & \\
- & \\
- & \\
- & \\
- & \\
-On Hand & 3509.30 \\
- & \\
-Acct. Payable & 975.15 \\
- & \\
-\hline
-Difference & 2534.15 \\
+Acct. Payable & %.2f \\
+ & \\ \hline
+Difference & %.2f \\
 \end{tabular}
 \end{multicols}
-
 \end{document}

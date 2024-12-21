@@ -11,8 +11,10 @@ public:
 private:
 	void OnCalculateClicked(wxCommandEvent& evt);
 	void OnSubmitClicked(wxCommandEvent& evt);
+	void OnPrintClicked(wxCommandEvent& evt);
 	void OnDateChanged(wxDateEvent& evt);
 	void CheckDateExists();
+	void CreatePDF();
 	wxDECLARE_EVENT_TABLE();
 };
 

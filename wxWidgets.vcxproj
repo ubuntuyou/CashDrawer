@@ -138,6 +138,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="ChildFrame.h" />
     <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
