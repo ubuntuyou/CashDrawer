@@ -40,12 +40,13 @@ enum IDs {
 	SUBMIT = 3,
 	PRINT = 4,
 	DPICKER = 5,
-	CLOSE = 6
+	CLOSE = 6,
+	CLOBBER = 7
 };
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_CLOSE(MainFrame::OnClose)
-//EVT_TEXT(wxID_ANY, MainFrame::OnTextEntered)
+EVT_CHECKBOX(CLOBBER, MainFrame::OnClobberChecked)
 EVT_BUTTON(CALCULATE, MainFrame::OnCalculateClicked)
 EVT_BUTTON(SUBMIT, MainFrame::OnSubmitClicked)
 EVT_BUTTON(PRINT, MainFrame::OnPrintClicked)
@@ -58,6 +59,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	wxIcon appIcon;
 	appIcon.LoadFile("aaaa", wxBITMAP_TYPE_ICO_RESOURCE);
 	if (appIcon.IsOk()) SetIcon(appIcon);
+
 	this->SetMinClientSize(wxSize(350, 525));
 	this->SetMaxClientSize(wxSize(350, 525));
 
@@ -83,7 +85,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	leftPanel->SetBackgroundColour(wxColour(150, 150, 150));
 	rightPanel->SetBackgroundColour(wxColour(150, 150, 150));
 */
-
+	wxCheckBox* clobber = new wxCheckBox(datePanel, CLOBBER, "Edit");
 	picker = new wxDatePickerCtrl(datePanel, DPICKER, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DROPDOWN);
 
 	// Creating the layout
@@ -132,6 +134,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 
 	// Add date picker widget to date sizer
 	dsizer->Add(picker);
+	dsizer->Add(clobber);
 
 	// Add growable columns to both grid sizers
 	gsizer1->AddGrowableCol(1, 1);
@@ -177,9 +180,9 @@ void MainFrame::OnClose(wxCloseEvent& evt) {
 	Destroy();
 }
 
-//void MainFrame::OnTextEntered(wxCommandEvent& evt) {
+void MainFrame::OnClobberChecked(wxCommandEvent& evt) {
 	
-//}
+}
 
 void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 	wxString date = picker->GetValue().Format("%m-%d-%Y");

@@ -10,7 +10,7 @@ public:
 	MainFrame(const wxString& title);
 private:
 	void OnClose(wxCloseEvent& evt);
-	//void OnTextEntered(wxCommandEvent& evt);
+	void OnClobberChecked(wxCommandEvent& evt);
 	void OnCalculateClicked(wxCommandEvent& evt);
 	void OnSubmitClicked(wxCommandEvent& evt);
 	void OnPrintClicked(wxCommandEvent& evt);
