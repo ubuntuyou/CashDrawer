@@ -1,14 +1,11 @@
 #include "MainFrame.h"
-#include <iostream>
-#include <fstream>
 #include <wx/wx.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
-#include <wx/filename.h>
 #include <wx/textfile.h>
-#include <wx/file.h>
 #include <wx/tokenzr.h>
 #include <wx/vector.h>
+#include "resource.h"
 
 #define DRAWER_LABEL 20
 #define DRAWER_TOTAL 21
@@ -26,13 +23,7 @@ wxStaticText* label[28];
 wxTextCtrl* entry[19];
 wxDouble value[19];
 wxDatePickerCtrl* picker;
-wxString date;
 wxString newLine;
-size_t lineCount;
-size_t line;
-wxStringTokenizer tokenizer;
-wxTextFile file(wxDateTime::Today().Format("%Y.csv"));
-wxTextFile xetex(wxDateTime::Today().Format("%Y.tex"));
 wxButton* submitButton;
 wxButton* calculateButton;
 wxButton* printButton;
@@ -40,24 +31,31 @@ wxDouble drawer;
 wxDouble onhand;
 wxDouble payable;
 wxDouble difference;
-bool dateExists;
+bool submitted;
 
 enum IDs {
 	CALCULATE = 2,
 	SUBMIT = 3,
 	PRINT = 4,
-	DPICKER = 5
+	DPICKER = 5,
+	CLOSE = 6
 };
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
+EVT_CLOSE(MainFrame::OnClose)
+//EVT_TEXT(wxID_ANY, MainFrame::OnTextEntered)
 EVT_BUTTON(CALCULATE, MainFrame::OnCalculateClicked)
 EVT_BUTTON(SUBMIT, MainFrame::OnSubmitClicked)
 EVT_BUTTON(PRINT, MainFrame::OnPrintClicked)
 EVT_DATE_CHANGED(DPICKER, MainFrame::OnDateChanged)
+
 wxEND_EVENT_TABLE()
 
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
+	wxIcon appIcon;
+	appIcon.LoadFile("aaaa", wxBITMAP_TYPE_ICO_RESOURCE);
+	if (appIcon.IsOk()) SetIcon(appIcon);
 	this->SetMinClientSize(wxSize(350, 525));
 	this->SetMaxClientSize(wxSize(350, 525));
 
@@ -85,7 +83,6 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 */
 
 	picker = new wxDatePickerCtrl(datePanel, DPICKER, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DROPDOWN);
-
 
 	// Creating the layout
 
@@ -172,39 +169,25 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	
 	
 	CheckDateExists();
-	if (dateExists) {
-		calculateButton->Disable();
-		submitButton->Disable();
-		tokenizer.SetString(file.GetLine(line), ",");
-		tokenizer.GetNextToken();
-
-		while (tokenizer.HasMoreTokens()) {
-			for (int i = 0; i < 19; i++) {
-				entry[i]->SetValue(tokenizer.GetNextToken());
-				entry[i]->SetEditable(false);
-			}
-			label[DRAWER_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[ONHAND_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[ACTPAY_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[DIFFER_TOTAL]->SetLabel(tokenizer.GetNextToken());
-		}
-	}
-	else {
-		calculateButton->Enable();
-		submitButton->Disable();
-	}
 }
 
+void MainFrame::OnClose(wxCloseEvent& evt) {
+	Destroy();
+}
+
+//void MainFrame::OnTextEntered(wxCommandEvent& evt) {
+	
+//}
+
 void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
+	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	drawer = 0;
 	onhand = 0;
 	payable = 0;
 	difference = 0;
 
+
 	submitButton->Enable();
-
-	date = picker->GetValue().Format("%m-%d-%Y");
-
 
 	// Get values from entries
 	newLine = date;
@@ -240,84 +223,28 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 }
 
 void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
-	// Need to make overwrite confirmation
-	// If overwrite confirmed then insert new line and delete the old one
-	// Maybe sort entries by date by pushing them all to a vector and sorting 
-	// before clearing file and rewriting from vector
+	// Need to make overwrite confirmationv If overwrite then insert newLine and delete old
 
-	if (!dateExists) {
-		file.AddLine(newLine);
-		lineCount = file.GetLineCount();
-		line = lineCount;
-		file.Write();
-		file.Close();
-		wxLogStatus("Data saved to file.");
-		CheckDateExists();
-		calculateButton->Disable();
-		submitButton->Disable();
-
-		tokenizer.SetString(file.GetLine(line), ",");
-		tokenizer.GetNextToken();
-
-		while (tokenizer.HasMoreTokens()) {
-			for (int i = 0; i < 19; i++) {
-				entry[i]->SetValue(tokenizer.GetNextToken());
-				entry[i]->SetEditable(false);
-			}
-			label[DRAWER_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[ONHAND_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[ACTPAY_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[DIFFER_TOTAL]->SetLabel(tokenizer.GetNextToken());
-		}
-		
-		CreatePDF();
-	}
+	submitted = true;
+	CheckDateExists();
 }
 
 void MainFrame::OnPrintClicked(wxCommandEvent& evt) {
+	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	ShellExecute(NULL, L"open", (wxString::Format(wxT(".\\XeLaTeX\\%s.pdf"), date)), NULL, NULL, SW_SHOW);
 }
 
-
 void MainFrame::OnDateChanged(wxDateEvent& evt) {
-	CheckDateExists(); // Sets dateExists to true or false
-	
-	if (dateExists) {
-		calculateButton->Disable();
-		submitButton->Disable();
-		tokenizer.SetString(file.GetLine(line), ",");
-		tokenizer.GetNextToken();
-		
-		while (tokenizer.HasMoreTokens()) {
-			for (int i = 0; i < 19; i++) {
-				entry[i]->SetValue(tokenizer.GetNextToken());
-				entry[i]->SetEditable(false);
-			}
-			label[DRAWER_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[ONHAND_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[ACTPAY_TOTAL]->SetLabel(tokenizer.GetNextToken());
-			label[DIFFER_TOTAL]->SetLabel(tokenizer.GetNextToken());
-		}
-	}
-	else {
-		calculateButton->Enable();
-		submitButton->Disable();
-		for (int i = 0; i < 19; i++) {
-			entry[i]->SetValue("0.00");
-			entry[i]->SetEditable(true);
-		}
-		label[DRAWER_TOTAL]->SetLabel(" ");
-		label[ONHAND_TOTAL]->SetLabel(" ");
-		label[ACTPAY_TOTAL]->SetLabel(" ");
-		label[DIFFER_TOTAL]->SetLabel(" ");
-	}
+	CheckDateExists();
 }
 
 void MainFrame::CheckDateExists() {
-	dateExists = false;
-
-	// TESTING!!! DELETE ME!!!
-	file.Clear();
+	size_t line = 0;
+	size_t lineCount = 0;
+	bool dateExists = false;
+	wxStringTokenizer tokenizer;
+	wxString date = picker->GetValue().Format("%m-%d-%Y");
+	wxTextFile file(picker->GetValue().Format("%Y.csv"));
 
 	if (!file.Exists()) {
 		file.Create();
@@ -327,10 +254,9 @@ void MainFrame::CheckDateExists() {
 		file.Open();
 	}
 
-	date = picker->GetValue().Format("%m-%d-%Y");
+	lineCount = file.GetLineCount();
 
 	tokenizer.SetString(file.GetFirstLine(), ",");
-	lineCount = file.GetLineCount();
 
 	entryDates.clear();
 
@@ -340,23 +266,85 @@ void MainFrame::CheckDateExists() {
 	}
 	
 	for (int i = 0; i < lineCount; i++) {
+		// Moved from OnDateChanged
 		if (entryDates[i] == date) {
-			wxLogStatus("Entry exists for date");
 			dateExists = true;
 			line = i;
+
+			calculateButton->Disable();
+			submitButton->Disable();
+			printButton->Enable();
+
+			tokenizer.SetString(file.GetLine(line), ",");
+			tokenizer.GetNextToken();
+
+			while (tokenizer.HasMoreTokens()) {
+				for (int i = 0; i < 19; i++) {
+					entry[i]->SetValue(tokenizer.GetNextToken());
+					entry[i]->SetEditable(false);
+				}
+				label[DRAWER_TOTAL]->SetLabel(tokenizer.GetNextToken());
+				label[ONHAND_TOTAL]->SetLabel(tokenizer.GetNextToken());
+				label[ACTPAY_TOTAL]->SetLabel(tokenizer.GetNextToken());
+				label[DIFFER_TOTAL]->SetLabel(tokenizer.GetNextToken());
+			}
+
+			wxLogStatus("Entry exists for date");	
 			break;
 		}
-		else
-			wxLogStatus(" ");
+	}
+	if (!dateExists && !submitted) {
+		calculateButton->Enable();
+		submitButton->Disable();
+		printButton->Disable();
+
+		for (int i = 0; i < 19; i++) {
+			entry[i]->SetValue("0.00");
+			entry[i]->SetEditable(true);
+		}
+		label[DRAWER_TOTAL]->SetLabel(" ");
+		label[ONHAND_TOTAL]->SetLabel(" ");
+		label[ACTPAY_TOTAL]->SetLabel(" ");
+		label[DIFFER_TOTAL]->SetLabel(" ");
+		
+		wxLogStatus(" ");
+	}
+	if (!dateExists && submitted) {
+		submitted = false;
+		calculateButton->Disable();
+		submitButton->Disable();
+		printButton->Enable();
+
+		file.AddLine(newLine);
+		file.Write();
+
+		tokenizer.SetString(newLine, ",");
+		tokenizer.GetNextToken();
+
+		while (tokenizer.HasMoreTokens()) {
+			for (int c = 0; c < 19; c++) {
+				entry[c]->SetValue(tokenizer.GetNextToken());
+				entry[c]->SetEditable(false);
+			}
+			label[DRAWER_TOTAL]->SetLabel(tokenizer.GetNextToken());
+			label[ONHAND_TOTAL]->SetLabel(tokenizer.GetNextToken());
+			label[ACTPAY_TOTAL]->SetLabel(tokenizer.GetNextToken());
+			label[DIFFER_TOTAL]->SetLabel(tokenizer.GetNextToken());
+		}
+
+		CreatePDF();
+
+		wxLogStatus("Data saved to file.");
 	}
 }
 
 void MainFrame::CreatePDF() {
-	wxString xetex;
+	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	wxTextFile tex("./XeLaTeX/CashDrawer.tex");
 	wxTextFile newTex(wxString::Format(("./XeLaTeX/%s.tex"), date));
-	wxString lcso = "Lincoln County Sheriff's Office";
-	wxString npne = "North Platte, Nebraska";
+	wxString title1 = "Lincoln County Sheriff's Office";
+	wxString title2 = "North Platte, Nebraska";
+
 	
 	if (!newTex.Exists()) newTex.Create();
 	if (!newTex.IsOpened()) newTex.Open();
@@ -364,18 +352,14 @@ void MainFrame::CreatePDF() {
 
 	newTex.Clear();
 
-	tokenizer.SetString(file.GetLine(line), ",");
-
-	//newTex.GetFirstLine();
-
 	newTex.AddLine(tex.GetFirstLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), lcso, npne)); //
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), tokenizer.GetNextToken())); //
+	newTex.AddLine(wxString::Format((tex.GetNextLine()), title1, title2));
+	newTex.AddLine(wxString::Format((tex.GetNextLine()), date));
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
@@ -424,5 +408,7 @@ void MainFrame::CreatePDF() {
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.Write();
+	newTex.Close();
+	tex.Close();
 	ShellExecute(NULL, wxT("open"), wxT(".\\XeLaTeX\\tectonic.exe"), (wxString::Format(wxT(".\\XeLaTeX\\%s.tex"), date)), NULL, SW_HIDE);
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include <wx/wx.h>
 #include <wx/dateevt.h>
-#include <wx/vector.h>
+
 
 
 
@@ -9,6 +9,8 @@ class MainFrame : public wxFrame {
 public:
 	MainFrame(const wxString& title);
 private:
+	void OnClose(wxCloseEvent& evt);
+	//void OnTextEntered(wxCommandEvent& evt);
 	void OnCalculateClicked(wxCommandEvent& evt);
 	void OnSubmitClicked(wxCommandEvent& evt);
 	void OnPrintClicked(wxCommandEvent& evt);
