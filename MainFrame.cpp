@@ -5,6 +5,7 @@
 #include <wx/textfile.h>
 #include <wx/tokenzr.h>
 #include <wx/vector.h>
+#include <wx/numformatter.h>
 #include "resource.h"
 
 #define DRAWER_LABEL 20
@@ -17,6 +18,7 @@
 #define DIFFER_TOTAL 27
 
 std::string fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
+std::string months[12] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 wxVector<wxString> entryDates;
 wxStaticText* label[28];
@@ -322,9 +324,9 @@ void MainFrame::CheckDateExists() {
 		tokenizer.GetNextToken();
 
 		while (tokenizer.HasMoreTokens()) {
-			for (int c = 0; c < 19; c++) {
-				entry[c]->SetValue(tokenizer.GetNextToken());
-				entry[c]->SetEditable(false);
+			for (int i = 0; i < 19; i++) {
+				entry[i]->SetValue(tokenizer.GetNextToken());
+				entry[i]->SetEditable(false);
 			}
 			label[DRAWER_TOTAL]->SetLabel(tokenizer.GetNextToken());
 			label[ONHAND_TOTAL]->SetLabel(tokenizer.GetNextToken());
@@ -344,8 +346,10 @@ void MainFrame::CreatePDF() {
 	wxTextFile newTex(wxString::Format(("./XeLaTeX/%s.tex"), date));
 	wxString title1 = "Lincoln County Sheriff's Office";
 	wxString title2 = "North Platte, Nebraska";
+	wxDouble dMonth;
+	wxString sMonth = months[wxNumberFormatter::FromString(picker->GetValue().Format("%m"), &dMonth)];
+	wxString sDate = picker->GetValue().Format("%d, %Y");
 
-	
 	if (!newTex.Exists()) newTex.Create();
 	if (!newTex.IsOpened()) newTex.Open();
 	if (!tex.IsOpened()) tex.Open();
@@ -359,7 +363,7 @@ void MainFrame::CreatePDF() {
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(wxString::Format((tex.GetNextLine()), title1, title2));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), date));
+	newTex.AddLine(wxString::Format((tex.GetNextLine()), sMonth, sDate));
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
