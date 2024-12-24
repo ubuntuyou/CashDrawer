@@ -20,6 +20,7 @@
 std::string fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
 std::string months[12] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
+wxCheckBox* edit;
 wxVector<wxString> entryDates;
 wxStaticText* label[28];
 wxTextCtrl* entry[19];
@@ -34,6 +35,7 @@ wxDouble onhand;
 wxDouble payable;
 wxDouble difference;
 bool submitted;
+bool clobber;
 
 enum IDs {
 	CALCULATE = 2,
@@ -46,7 +48,7 @@ enum IDs {
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_CLOSE(MainFrame::OnClose)
-EVT_CHECKBOX(CLOBBER, MainFrame::OnClobberChecked)
+EVT_CHECKBOX(CLOBBER, MainFrame::OnEditChecked)
 EVT_BUTTON(CALCULATE, MainFrame::OnCalculateClicked)
 EVT_BUTTON(SUBMIT, MainFrame::OnSubmitClicked)
 EVT_BUTTON(PRINT, MainFrame::OnPrintClicked)
@@ -85,8 +87,9 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	leftPanel->SetBackgroundColour(wxColour(150, 150, 150));
 	rightPanel->SetBackgroundColour(wxColour(150, 150, 150));
 */
-	wxCheckBox* clobber = new wxCheckBox(datePanel, CLOBBER, "Edit");
+	
 	picker = new wxDatePickerCtrl(datePanel, DPICKER, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DROPDOWN);
+	edit = new wxCheckBox(datePanel, CLOBBER, "Edit");
 
 	// Creating the layout
 
@@ -134,7 +137,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 
 	// Add date picker widget to date sizer
 	dsizer->Add(picker);
-	dsizer->Add(clobber);
+	dsizer->Add(edit);
 
 	// Add growable columns to both grid sizers
 	gsizer1->AddGrowableCol(1, 1);
@@ -180,8 +183,12 @@ void MainFrame::OnClose(wxCloseEvent& evt) {
 	Destroy();
 }
 
-void MainFrame::OnClobberChecked(wxCommandEvent& evt) {
-	
+void MainFrame::OnEditChecked(wxCommandEvent& evt) {
+	if (evt.IsChecked())
+		clobber = true;
+	else
+		clobber = false;
+	CheckDateExists();
 }
 
 void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
@@ -250,9 +257,11 @@ void MainFrame::CheckDateExists() {
 	wxStringTokenizer tokenizer;
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	wxTextFile file(picker->GetValue().Format("%Y.csv"));
+	
 
 	if (!file.Exists()) {
 		file.Create();
+		file.Open();
 		wxMessageBox("Created a new file. Happy new year!");
 	}
 	if (!file.IsOpened()) {
@@ -271,7 +280,6 @@ void MainFrame::CheckDateExists() {
 	}
 	
 	for (int i = 0; i < lineCount; i++) {
-		// Moved from OnDateChanged
 		if (entryDates[i] == date) {
 			dateExists = true;
 			line = i;
@@ -298,7 +306,7 @@ void MainFrame::CheckDateExists() {
 			break;
 		}
 	}
-	if (!dateExists && !submitted) {
+	if ((!dateExists && !submitted) || (dateExists && clobber)) {
 		calculateButton->Enable();
 		submitButton->Disable();
 		printButton->Disable();
@@ -314,11 +322,16 @@ void MainFrame::CheckDateExists() {
 		
 		wxLogStatus(" ");
 	}
-	if (!dateExists && submitted) {
+	if ((!dateExists && submitted) || (submitted && clobber)) {
+		if (clobber)
+			file.RemoveLine(line);
+
 		submitted = false;
 		calculateButton->Disable();
 		submitButton->Disable();
 		printButton->Enable();
+		edit->SetValue(false);
+		clobber = false;
 
 		file.AddLine(newLine);
 		file.Write();
