@@ -18,7 +18,7 @@
 #define DIFFER_TOTAL 27
 
 std::string fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
-std::string months[12] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+std::string months[13] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 wxCheckBox* edit;
 wxVector<wxString> entryDates;
@@ -34,6 +34,7 @@ wxDouble drawer;
 wxDouble onhand;
 wxDouble payable;
 wxDouble difference;
+size_t line;
 bool submitted;
 bool clobber;
 
@@ -235,8 +236,6 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 }
 
 void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
-	// Need to make overwrite confirmationv If overwrite then insert newLine and delete old
-
 	submitted = true;
 	CheckDateExists();
 }
@@ -251,12 +250,11 @@ void MainFrame::OnDateChanged(wxDateEvent& evt) {
 }
 
 void MainFrame::CheckDateExists() {
-	size_t line = 0;
-	size_t lineCount = 0;
 	bool dateExists = false;
 	wxStringTokenizer tokenizer;
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	wxTextFile file(picker->GetValue().Format("%Y.csv"));
+	size_t lineCount;
 	
 
 	if (!file.Exists()) {
@@ -287,6 +285,7 @@ void MainFrame::CheckDateExists() {
 			calculateButton->Disable();
 			submitButton->Disable();
 			printButton->Enable();
+			edit->Enable();
 
 			tokenizer.SetString(file.GetLine(line), ",");
 			tokenizer.GetNextToken();
@@ -310,6 +309,9 @@ void MainFrame::CheckDateExists() {
 		calculateButton->Enable();
 		submitButton->Disable();
 		printButton->Disable();
+		if (!dateExists) edit->Disable();
+		//clobber = false;
+		//edit->SetValue(clobber);
 
 		for (int i = 0; i < 19; i++) {
 			entry[i]->SetValue("0.00");
@@ -330,8 +332,9 @@ void MainFrame::CheckDateExists() {
 		calculateButton->Disable();
 		submitButton->Disable();
 		printButton->Enable();
-		edit->SetValue(false);
 		clobber = false;
+		edit->SetValue(clobber);
+		edit->Enable();
 
 		file.AddLine(newLine);
 		file.Write();
@@ -357,21 +360,56 @@ void MainFrame::CheckDateExists() {
 }
 
 void MainFrame::CreatePDF() {
-	wxString date = picker->GetValue().Format("%m-%d-%Y");
-	wxTextFile tex("./XeLaTeX/CashDrawer.tex");
-	wxTextFile newTex(wxString::Format(("./XeLaTeX/%s.tex"), date));
-	wxString title1 = "Lincoln County Sheriff's Office";
-	wxString title2 = "North Platte, Nebraska";
 	wxDouble dMonth;
 	wxString sMonth = months[wxNumberFormatter::FromString(picker->GetValue().Format("%m"), &dMonth)];
 	wxString sDate = picker->GetValue().Format("%d, %Y");
 
+	wxString date = picker->GetValue().Format("%m-%d-%Y");
+	wxString year = picker->GetValue().Format("%Y");
+
+	wxTextFile tex("./XeLaTeX/CashDrawer.tex");
+	wxTextFile newTex(wxString::Format(("./XeLaTeX/%s.tex"), date));
+	wxTextFile summary("./XeLaTeX/Summary.tex");
+	wxTextFile newSummary(wxString::Format(("./XeLaTeX/%s-Summary.tex"), year));
+	wxString title1 = "Lincoln County Sheriff's Office";
+	wxString title2 = "North Platte, Nebraska";
+	size_t lineCount = 0;
+
+	if (!newSummary.Exists()) {
+		summary.Open();
+		newSummary.Create();
+		while (!newSummary.Open());
+		newSummary.AddLine(summary.GetFirstLine());
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(wxString::Format((summary.GetNextLine()), year));
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(summary.GetNextLine());
+		newSummary.Write();
+		summary.Close();
+	}
+
+
+	if (!newSummary.IsOpened()) 
+		newSummary.Open();
+	newSummary.InsertLine(wxString::Format(wxT("%s %s & \\$%.2f & \\$%.2f & \\$%.2f \\\\ \\hline"), sMonth, sDate, onhand, payable, difference), (newSummary.GetLineCount() - 1));
+	newSummary.Write();
+	newSummary.Close();
+
+	ShellExecute(NULL, wxT("open"), wxT(".\\XeLaTeX\\tectonic.exe"), (wxString::Format(wxT(".\\XeLaTeX\\%s-Summary.tex"), year)), NULL, SW_HIDE);
+	
 	if (!newTex.Exists()) newTex.Create();
 	if (!newTex.IsOpened()) newTex.Open();
 	if (!tex.IsOpened()) tex.Open();
 
+	//lineCount = newTex.GetLineCount();
+	//newTex.RemoveLine(lineCount - 1);
 	newTex.Clear();
-
+	
 	newTex.AddLine(tex.GetFirstLine());
 	newTex.AddLine(tex.GetNextLine());
 	newTex.AddLine(tex.GetNextLine());
