@@ -17,8 +17,8 @@
 #define DIFFER_LABEL 26
 #define DIFFER_TOTAL 27
 
-std::string fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
-std::string months[13] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+wxString fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
+wxString months[12] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 wxCheckBox* edit;
 wxVector<wxString> entryDates;
@@ -360,9 +360,10 @@ void MainFrame::CheckDateExists() {
 }
 
 void MainFrame::CreatePDF() {
-	wxDouble dMonth;
-	wxString sMonth = months[wxNumberFormatter::FromString(picker->GetValue().Format("%m"), &dMonth)];
+	double dMonth;
+	wxString sMonth = months[11]; //wxNumberFormatter::FromString(picker->GetValue().Format("%m"), &dMonth)];
 	wxString sDate = picker->GetValue().Format("%d, %Y");
+	wxMessageBox(sMonth);
 
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	wxString year = picker->GetValue().Format("%Y");
