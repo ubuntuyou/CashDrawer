@@ -3,6 +3,7 @@
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
 #include <wx/textfile.h>
+#include <wx/filefn.h>
 #include <wx/tokenzr.h>
 #include <wx/vector.h>
 #include <wx/numformatter.h>
@@ -403,18 +404,7 @@ void MainFrame::CreatePDF() {
 	newSummary.Write();
 	newSummary.Close();
 
-	if (!ShellExecute(NULL, wxT("open"), (wxString::Format((".\\XeLaTeX\\tectonic.exe"))), (wxString::Format((".\\XeLaTeX\\%s-%s-Summary.tex"), year, month)), NULL, SW_HIDE)) 
-		wxLogMessage("Tectonic could not start.");
-	/*
-	while (!newSummary.Exists() && !pdfSummary.Exists())
-		continue;
-	if (wxCopyFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month), wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\PDFs\\%s-%s-Summary.pdf"), year, month)))
-		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
-	else {
-		wxTextFile pdfSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
-		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
-	}
-	*/
+	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\%s-%s-Summary.tex --outdir .\\XeLaTeX\\PDFs"), year, month));
 
 	if (!newTex.Exists()) newTex.Create();
 	if (!newTex.IsOpened()) newTex.Open();
@@ -482,14 +472,6 @@ void MainFrame::CreatePDF() {
 	newTex.Write();
 	newTex.Close();
 	tex.Close();
-	if (!ShellExecute(NULL, wxT("open"), wxT(".\\XeLaTeX\\tectonic.exe"), (wxString::Format(wxT(".\\XeLaTeX\\%s.tex"), date)), NULL, SW_HIDE))
-		wxLogMessage("Tectonic could not start.");
-	/*
-	while (!newTex.Exists() && !pdfTex.Exists())
-		continue;
-	if (wxCopyFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.pdf"), date), wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\PDFs\\%s.pdf"), date))) {
-		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.pdf"), date));
-		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.tex"), date));
-	}
-	*/
+	
+	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\%s.tex --outdir .\\XeLaTeX\\PDFs"), date));
 }
