@@ -365,13 +365,15 @@ void MainFrame::CreatePDF() {
 	wxString sDate = picker->GetValue().Format("%d, %Y");
 	wxString month = picker->GetValue().Format("%m");
 
+
 	wxString year = picker->GetValue().Format("%Y");
 
 	wxTextFile tex(".\\XeLaTeX\\Templates\\CashDrawer.tex");
 	wxTextFile newTex(wxString::Format((".\\XeLaTeX\\%s.tex"), date));
+	wxTextFile pdfTex(wxString::Format((".\\XeLaTeX\\%s.pdf"), date));
 	wxTextFile summary(".\\XeLaTeX\\Templates\\Summary.tex");
 	wxTextFile newSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.tex"), year, month));
-	
+	wxTextFile pdfSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
 	wxString title1 = "Lincoln County Sheriff's Office";
 	wxString title2 = "North Platte, Nebraska";
 	size_t lineCount = 0;
@@ -403,10 +405,16 @@ void MainFrame::CreatePDF() {
 
 	if (!ShellExecute(NULL, wxT("open"), (wxString::Format((".\\XeLaTeX\\tectonic.exe"))), (wxString::Format((".\\XeLaTeX\\%s-%s-Summary.tex"), year, month)), NULL, SW_HIDE)) 
 		wxLogMessage("Tectonic could not start.");
-	wxTextFile pdfSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
-	
+	/*
+	while (!newSummary.Exists() && !pdfSummary.Exists())
+		continue;
 	if (wxCopyFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month), wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\PDFs\\%s-%s-Summary.pdf"), year, month)))
 		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
+	else {
+		wxTextFile pdfSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
+		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
+	}
+	*/
 
 	if (!newTex.Exists()) newTex.Create();
 	if (!newTex.IsOpened()) newTex.Open();
@@ -476,13 +484,12 @@ void MainFrame::CreatePDF() {
 	tex.Close();
 	if (!ShellExecute(NULL, wxT("open"), wxT(".\\XeLaTeX\\tectonic.exe"), (wxString::Format(wxT(".\\XeLaTeX\\%s.tex"), date)), NULL, SW_HIDE))
 		wxLogMessage("Tectonic could not start.");
-	wxTextFile pdfTex(wxString::Format((".\\XeLaTeX\\%s.pdf"), date));
-	
+	/*
 	while (!newTex.Exists() && !pdfTex.Exists())
 		continue;
 	if (wxCopyFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.pdf"), date), wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\PDFs\\%s.pdf"), date))) {
 		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.pdf"), date));
 		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.tex"), date));
 	}
-	
+	*/
 }
