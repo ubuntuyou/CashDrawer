@@ -18,7 +18,6 @@
 #define DIFFER_TOTAL 27
 
 wxString fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
-wxString months[12] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 wxCheckBox* edit;
 wxVector<wxString> entryDates;
@@ -360,18 +359,19 @@ void MainFrame::CheckDateExists() {
 }
 
 void MainFrame::CreatePDF() {
-	double dMonth;
-	wxString sMonth = months[11]; //wxNumberFormatter::FromString(picker->GetValue().Format("%m"), &dMonth)];
-	wxString sDate = picker->GetValue().Format("%d, %Y");
-	wxMessageBox(sMonth);
-
+	//double dMonth;
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
+	wxString sMonth = picker->GetValue().Format("%b");
+	wxString sDate = picker->GetValue().Format("%d, %Y");
+	wxString month = picker->GetValue().Format("%m");
+
 	wxString year = picker->GetValue().Format("%Y");
 
-	wxTextFile tex("./XeLaTeX/CashDrawer.tex");
-	wxTextFile newTex(wxString::Format(("./XeLaTeX/%s.tex"), date));
-	wxTextFile summary("./XeLaTeX/Summary.tex");
-	wxTextFile newSummary(wxString::Format(("./XeLaTeX/%s-Summary.tex"), year));
+	wxTextFile tex(".\\XeLaTeX\\Templates\\CashDrawer.tex");
+	wxTextFile newTex(wxString::Format((".\\XeLaTeX\\%s.tex"), date));
+	wxTextFile summary(".\\XeLaTeX\\Templates\\Summary.tex");
+	wxTextFile newSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.tex"), year, month));
+	
 	wxString title1 = "Lincoln County Sheriff's Office";
 	wxString title2 = "North Platte, Nebraska";
 	size_t lineCount = 0;
@@ -379,7 +379,8 @@ void MainFrame::CreatePDF() {
 	if (!newSummary.Exists()) {
 		summary.Open();
 		newSummary.Create();
-		while (!newSummary.Open());
+		while (!newSummary.Open())
+			continue;
 		newSummary.AddLine(summary.GetFirstLine());
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.AddLine(summary.GetNextLine());
@@ -394,19 +395,23 @@ void MainFrame::CreatePDF() {
 		summary.Close();
 	}
 
-
 	if (!newSummary.IsOpened()) 
 		newSummary.Open();
-	newSummary.InsertLine(wxString::Format(wxT("%s %s & \\$%.2f & \\$%.2f & \\$%.2f \\\\ \\hline"), sMonth, sDate, onhand, payable, difference), (newSummary.GetLineCount() - 1));
+	newSummary.InsertLine(wxString::Format(("%s %s & \\$%.2f & \\$%.2f & \\$%.2f \\\\ \\hline"), sMonth, sDate, onhand, payable, difference), (newSummary.GetLineCount() - 1));
 	newSummary.Write();
 	newSummary.Close();
 
-	ShellExecute(NULL, wxT("open"), wxT(".\\XeLaTeX\\tectonic.exe"), (wxString::Format(wxT(".\\XeLaTeX\\%s-Summary.tex"), year)), NULL, SW_HIDE);
+	if (!ShellExecute(NULL, wxT("open"), (wxString::Format((".\\XeLaTeX\\tectonic.exe"))), (wxString::Format((".\\XeLaTeX\\%s-%s-Summary.tex"), year, month)), NULL, SW_HIDE)) 
+		wxLogMessage("Tectonic could not start.");
+	wxTextFile pdfSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
 	
+	if (wxCopyFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month), wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\PDFs\\%s-%s-Summary.pdf"), year, month)))
+		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
+
 	if (!newTex.Exists()) newTex.Create();
 	if (!newTex.IsOpened()) newTex.Open();
 	if (!tex.IsOpened()) tex.Open();
-
+	
 	//lineCount = newTex.GetLineCount();
 	//newTex.RemoveLine(lineCount - 1);
 	newTex.Clear();
@@ -469,5 +474,15 @@ void MainFrame::CreatePDF() {
 	newTex.Write();
 	newTex.Close();
 	tex.Close();
-	ShellExecute(NULL, wxT("open"), wxT(".\\XeLaTeX\\tectonic.exe"), (wxString::Format(wxT(".\\XeLaTeX\\%s.tex"), date)), NULL, SW_HIDE);
+	if (!ShellExecute(NULL, wxT("open"), wxT(".\\XeLaTeX\\tectonic.exe"), (wxString::Format(wxT(".\\XeLaTeX\\%s.tex"), date)), NULL, SW_HIDE))
+		wxLogMessage("Tectonic could not start.");
+	wxTextFile pdfTex(wxString::Format((".\\XeLaTeX\\%s.pdf"), date));
+	
+	while (!newTex.Exists() && !pdfTex.Exists())
+		continue;
+	if (wxCopyFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.pdf"), date), wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\PDFs\\%s.pdf"), date))) {
+		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.pdf"), date));
+		wxRemoveFile(wxString::Format(("C:\\users\\ezeki\\source\\repos\\CashDrawer\\XeLaTeX\\%s.tex"), date));
+	}
+	
 }
