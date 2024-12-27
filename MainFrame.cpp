@@ -360,24 +360,31 @@ void MainFrame::CheckDateExists() {
 }
 
 void MainFrame::CreatePDF() {
-	//double dMonth;
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	wxString sMonth = picker->GetValue().Format("%b");
+	wxString lMonth = picker->GetValue().Format("%B");
 	wxString sDate = picker->GetValue().Format("%d, %Y");
 	wxString month = picker->GetValue().Format("%m");
-
-
 	wxString year = picker->GetValue().Format("%Y");
 
-	wxTextFile tex(".\\XeLaTeX\\Templates\\CashDrawer.tex");
-	wxTextFile newTex(wxString::Format((".\\XeLaTeX\\%s.tex"), date));
-	wxTextFile pdfTex(wxString::Format((".\\XeLaTeX\\%s.pdf"), date));
-	wxTextFile summary(".\\XeLaTeX\\Templates\\Summary.tex");
-	wxTextFile newSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.tex"), year, month));
-	wxTextFile pdfSummary(wxString::Format((".\\XeLaTeX\\%s-%s-Summary.pdf"), year, month));
+	wxTextFile tex(".\\XeLaTeX\\template\\CashDrawer.tex");
+	wxTextFile newTex(wxString::Format((".\\XeLaTeX\\daily\\%s.tex"), date));
+	wxTextFile summary(".\\XeLaTeX\\template\\Summary.tex");
+	wxTextFile newSummary(wxString::Format((".\\XeLaTeX\\monthly\\%s-%s-Summary.tex"), year, month));
 	wxString title1 = "Lincoln County Sheriff's Office";
 	wxString title2 = "North Platte, Nebraska";
 	size_t lineCount = 0;
+
+	if (!wxDirExists(".\\XeLaTeX\\monthly"))
+		wxMkDir(".\\XeLaTeX\\monthly");
+	if (!wxDirExists(".\\XeLaTeX\\daily"))
+		wxMkDir(".\\XeLaTeX\\monthly");
+	if (!wxDirExists(".\\XeLaTeX\\PDF"))
+		wxMkDir(".\\XeLaTeX\\PDF");
+	if (!wxDirExists(".\\XeLaTeX\\PDF\\summary"))
+		wxMkDir(".\\XeLaTeX\\summary");
+	if (!wxDirExists(".\\XeLaTeX\\PDF\\report"))
+		wxMkDir(".\\XeLaTeX\\report");
 
 	if (!newSummary.Exists()) {
 		summary.Open();
@@ -387,8 +394,7 @@ void MainFrame::CreatePDF() {
 		newSummary.AddLine(summary.GetFirstLine());
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.AddLine(summary.GetNextLine());
-		newSummary.AddLine(summary.GetNextLine());
-		newSummary.AddLine(wxString::Format((summary.GetNextLine()), year));
+		newSummary.AddLine(wxString::Format((summary.GetNextLine()), lMonth, year));
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.AddLine(summary.GetNextLine());
@@ -400,11 +406,11 @@ void MainFrame::CreatePDF() {
 
 	if (!newSummary.IsOpened()) 
 		newSummary.Open();
-	newSummary.InsertLine(wxString::Format(("%s %s & \\$%.2f & \\$%.2f & \\$%.2f \\\\ \\hline"), sMonth, sDate, onhand, payable, difference), (newSummary.GetLineCount() - 1));
+	newSummary.InsertLine(wxString::Format(("%s & \\$%.2f & \\$%.2f & \\$%.2f \\\\ \\hline"), date, onhand, payable, difference), (newSummary.GetLineCount() - 1));
 	newSummary.Write();
 	newSummary.Close();
 
-	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\%s-%s-Summary.tex --outdir .\\XeLaTeX\\PDFs"), year, month));
+	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\monthly\\%s-%s-Summary.tex --outdir .\\XeLaTeX\\PDF\\summary"), year, month));
 
 	if (!newTex.Exists()) newTex.Create();
 	if (!newTex.IsOpened()) newTex.Open();
@@ -473,5 +479,5 @@ void MainFrame::CreatePDF() {
 	newTex.Close();
 	tex.Close();
 	
-	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\%s.tex --outdir .\\XeLaTeX\\PDFs"), date));
+	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\daily\\%s.tex --outdir .\\XeLaTeX\\PDF\\report"), date));
 }
