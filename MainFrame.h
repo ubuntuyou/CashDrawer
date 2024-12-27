@@ -11,6 +11,7 @@ public:
 private:
 	void OnClose(wxCloseEvent& evt);
 	void OnEditChecked(wxCommandEvent& evt);
+	void OnSummaryClicked(wxCommandEvent& evt);
 	void OnCalculateClicked(wxCommandEvent& evt);
 	void OnSubmitClicked(wxCommandEvent& evt);
 	void OnPrintClicked(wxCommandEvent& evt);

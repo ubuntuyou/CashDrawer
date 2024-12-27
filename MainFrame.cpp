@@ -7,6 +7,7 @@
 #include <wx/tokenzr.h>
 #include <wx/vector.h>
 #include <wx/numformatter.h>
+#include <wx/file.h>
 #include "resource.h"
 
 #define DRAWER_LABEL 20
@@ -18,25 +19,25 @@
 #define DIFFER_LABEL 26
 #define DIFFER_TOTAL 27
 
-wxString fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives", "Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
-
-wxCheckBox* edit;
-wxVector<wxString> entryDates;
 wxStaticText* label[28];
 wxTextCtrl* entry[19];
 wxDouble value[19];
 wxDatePickerCtrl* picker;
-wxString newLine;
-wxButton* submitButton;
+wxCheckBox* edit;
+wxButton* summaryButton;
 wxButton* calculateButton;
+wxButton* submitButton;
 wxButton* printButton;
 wxDouble drawer;
 wxDouble onhand;
 wxDouble payable;
 wxDouble difference;
+wxString newLine;
 size_t line;
 bool submitted;
 bool clobber;
+
+
 
 enum IDs {
 	CALCULATE = 2,
@@ -44,12 +45,14 @@ enum IDs {
 	PRINT = 4,
 	DPICKER = 5,
 	CLOSE = 6,
-	CLOBBER = 7
+	CLOBBER = 7,
+	SUMMARY = 8
 };
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_CLOSE(MainFrame::OnClose)
 EVT_CHECKBOX(CLOBBER, MainFrame::OnEditChecked)
+EVT_BUTTON(SUMMARY, MainFrame::OnSummaryClicked)
 EVT_BUTTON(CALCULATE, MainFrame::OnCalculateClicked)
 EVT_BUTTON(SUBMIT, MainFrame::OnSubmitClicked)
 EVT_BUTTON(PRINT, MainFrame::OnPrintClicked)
@@ -59,6 +62,9 @@ wxEND_EVENT_TABLE()
 
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
+	wxString fields[] = { "Pennies", "Nickels", "Dimes", "Quarters", "Ones", "Fives",
+		"Tens", "Twenties", "Fifties", "Hundreds", "Checks", "Bank Acct.", "M.V. Due", "Petty Cash", "Cash Bag", "Office", "Copy", "Firearms", "Prints" };
+
 	wxIcon appIcon;
 	appIcon.LoadFile("aaaa", wxBITMAP_TYPE_ICO_RESOURCE);
 	if (appIcon.IsOk()) SetIcon(appIcon);
@@ -73,7 +79,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	wxFlexGridSizer* gsizer1 = new wxFlexGridSizer(13, 2, 10, 8);
 	wxFlexGridSizer* gsizer2 = new wxFlexGridSizer(13, 2, 10, 8);
 	wxFlexGridSizer* bsizer = new wxFlexGridSizer(1, 4, 10, 10);
-	wxFlexGridSizer* dsizer = new wxFlexGridSizer(1, 2, 10, 10);
+	wxFlexGridSizer* dsizer = new wxFlexGridSizer(1, 3, 10, 10);
 
 	wxPanel* mainPanel = new wxPanel(this);
 	wxPanel* datePanel = new wxPanel(mainPanel);
@@ -81,16 +87,10 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	wxPanel* rightPanel = new wxPanel(mainPanel);
 	wxPanel* buttonPanel = new wxPanel(mainPanel);
 
-/*
-	mainPanel->SetBackgroundColour(wxColour(100, 100, 100));
-	datePanel->SetBackgroundColour(wxColour(150, 150, 150));
-	buttonPanel->SetBackgroundColour(wxColour(150, 150, 150));
-	leftPanel->SetBackgroundColour(wxColour(150, 150, 150));
-	rightPanel->SetBackgroundColour(wxColour(150, 150, 150));
-*/
 	
 	picker = new wxDatePickerCtrl(datePanel, DPICKER, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DROPDOWN);
 	edit = new wxCheckBox(datePanel, CLOBBER, "Edit");
+	summaryButton = new wxButton(datePanel, SUMMARY, "Summary");
 
 	// Creating the layout
 
@@ -137,8 +137,10 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 	// Adding stuff to things
 
 	// Add date picker widget to date sizer
-	dsizer->Add(picker);
-	dsizer->Add(edit);
+	dsizer->AddGrowableCol(2, 1);
+	dsizer->Add(picker, 0, wxALIGN_RIGHT | wxALL, FromDIP(10));
+	dsizer->Add(edit, 0, wxALIGN_LEFT | wxALL, FromDIP(10));
+	dsizer->Add(summaryButton, 0, wxALIGN_RIGHT | wxALL, FromDIP(10));
 
 	// Add growable columns to both grid sizers
 	gsizer1->AddGrowableCol(1, 1);
@@ -176,7 +178,6 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 
 	CreateStatusBar();
 	
-	
 	CheckDateExists();
 }
 
@@ -198,7 +199,6 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 	onhand = 0;
 	payable = 0;
 	difference = 0;
-
 
 	submitButton->Enable();
 
@@ -240,9 +240,21 @@ void MainFrame::OnSubmitClicked(wxCommandEvent& evt) {
 	CheckDateExists();
 }
 
+void MainFrame::OnSummaryClicked(wxCommandEvent& evt) {
+	wxString date = picker->GetValue().Format("%Y-%m");
+	
+	if (wxFile().Exists(wxString::Format((".\\summary\\%s-Summary.pdf"), date)))
+		wxLaunchDefaultApplication(wxString::Format((".\\summary\\%s-Summary.pdf"), date));
+	else
+		wxLogStatus(wxString::Format(("No summary exists for %s"), date));
+}
+
 void MainFrame::OnPrintClicked(wxCommandEvent& evt) {
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
-	ShellExecute(NULL, L"open", (wxString::Format(wxT(".\\XeLaTeX\\%s.pdf"), date)), NULL, NULL, SW_SHOW);
+	if (wxFile().Exists(wxString::Format((".\\report\\%s.pdf"), date)))
+		wxLaunchDefaultApplication(wxString::Format((".\\report\\%s.pdf"), date));
+	else
+		wxLogStatus(wxString::Format(("No report exists for %s"), date));
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& evt) {
@@ -250,12 +262,12 @@ void MainFrame::OnDateChanged(wxDateEvent& evt) {
 }
 
 void MainFrame::CheckDateExists() {
-	bool dateExists = false;
+	wxVector<wxString> entryDates;
 	wxStringTokenizer tokenizer;
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
-	wxTextFile file(picker->GetValue().Format("%Y.csv"));
+	wxTextFile file(picker->GetValue().Format(".\\data\\%Y.csv"));
 	size_t lineCount;
-	
+	bool dateExists = false;
 
 	if (!file.Exists()) {
 		file.Create();
@@ -276,7 +288,7 @@ void MainFrame::CheckDateExists() {
 		entryDates.push_back(tokenizer.GetNextToken());
 		tokenizer.SetString(file.GetNextLine(), ",");
 	}
-	
+
 	for (int i = 0; i < lineCount; i++) {
 		if (entryDates[i] == date) {
 			dateExists = true;
@@ -310,8 +322,6 @@ void MainFrame::CheckDateExists() {
 		submitButton->Disable();
 		printButton->Disable();
 		if (!dateExists) edit->Disable();
-		//clobber = false;
-		//edit->SetValue(clobber);
 
 		for (int i = 0; i < 19; i++) {
 			entry[i]->SetValue("0.00");
@@ -366,25 +376,18 @@ void MainFrame::CreatePDF() {
 	wxString sDate = picker->GetValue().Format("%d, %Y");
 	wxString month = picker->GetValue().Format("%m");
 	wxString year = picker->GetValue().Format("%Y");
+	wxVector<wxString> sumDates;
+	wxStringTokenizer tokenizer;
+	bool dateExists = false;
 
-	wxTextFile tex(".\\XeLaTeX\\template\\CashDrawer.tex");
-	wxTextFile newTex(wxString::Format((".\\XeLaTeX\\daily\\%s.tex"), date));
-	wxTextFile summary(".\\XeLaTeX\\template\\Summary.tex");
-	wxTextFile newSummary(wxString::Format((".\\XeLaTeX\\monthly\\%s-%s-Summary.tex"), year, month));
+	wxTextFile report(".\\template\\Report.tex");
+	wxTextFile newReport(wxString::Format((".\\data\\daily\\%s.tex"), date));
+	wxTextFile summary(".\\template\\Summary.tex");
+	wxTextFile newSummary(wxString::Format((".\\data\\monthly\\%s-%s-Summary.tex"), year, month));
 	wxString title1 = "Lincoln County Sheriff's Office";
 	wxString title2 = "North Platte, Nebraska";
 	size_t lineCount = 0;
-
-	if (!wxDirExists(".\\XeLaTeX\\monthly"))
-		wxMkDir(".\\XeLaTeX\\monthly");
-	if (!wxDirExists(".\\XeLaTeX\\daily"))
-		wxMkDir(".\\XeLaTeX\\monthly");
-	if (!wxDirExists(".\\XeLaTeX\\PDF"))
-		wxMkDir(".\\XeLaTeX\\PDF");
-	if (!wxDirExists(".\\XeLaTeX\\PDF\\summary"))
-		wxMkDir(".\\XeLaTeX\\summary");
-	if (!wxDirExists(".\\XeLaTeX\\PDF\\report"))
-		wxMkDir(".\\XeLaTeX\\report");
+	size_t line = 0;
 
 	if (!newSummary.Exists()) {
 		summary.Open();
@@ -394,10 +397,9 @@ void MainFrame::CreatePDF() {
 		newSummary.AddLine(summary.GetFirstLine());
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.AddLine(summary.GetNextLine());
-		newSummary.AddLine(wxString::Format((summary.GetNextLine()), lMonth, year));
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.AddLine(summary.GetNextLine());
-		newSummary.AddLine(summary.GetNextLine());
+		newSummary.AddLine(wxString::Format((summary.GetNextLine()), sMonth, year));
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.AddLine(summary.GetNextLine());
 		newSummary.Write();
@@ -406,78 +408,102 @@ void MainFrame::CreatePDF() {
 
 	if (!newSummary.IsOpened()) 
 		newSummary.Open();
-	newSummary.InsertLine(wxString::Format(("%s & \\$%.2f & \\$%.2f & \\$%.2f \\\\ \\hline"), date, onhand, payable, difference), (newSummary.GetLineCount() - 1));
+
+	// Check if date exists and replace if it does
+	sumDates.clear();
+	lineCount = newSummary.GetLineCount();
+	tokenizer.SetString(newSummary.GetFirstLine(), " &");
+
+	for (int i = 0; i < lineCount; i++) {
+		sumDates.push_back(tokenizer.GetNextToken());
+		tokenizer.SetString(newSummary.GetNextLine(), " &");
+	}
+
+	for (int i = 0; i < lineCount; i++) {
+		if (sumDates[i] == date) {
+			line = i;
+			dateExists = true;
+			break;
+		}
+		else
+			line = lineCount - 1;
+	}
+	
+	newSummary.InsertLine(wxString::Format(("%s & \\$%.2f & \\$%.2f & \\$%.2f \\\\ \\hline"), date, onhand, payable, difference), line);
+	if (dateExists)
+		newSummary.RemoveLine(line + 1);
+
 	newSummary.Write();
 	newSummary.Close();
 
-	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\monthly\\%s-%s-Summary.tex --outdir .\\XeLaTeX\\PDF\\summary"), year, month));
+	if (!wxExecute(wxString::Format((".\\tectonic.exe .\\data\\monthly\\%s-%s-Summary.tex -c minimal -o .\\summary"), year, month)))
+		wxLogMessage("Error generating summary!");
 
-	if (!newTex.Exists()) newTex.Create();
-	if (!newTex.IsOpened()) newTex.Open();
-	if (!tex.IsOpened()) tex.Open();
+	if (!newReport.Exists()) newReport.Create();
+	if (!newReport.IsOpened()) newReport.Open();
+	if (!report.IsOpened()) report.Open();
 	
-	//lineCount = newTex.GetLineCount();
-	//newTex.RemoveLine(lineCount - 1);
-	newTex.Clear();
+	newReport.Clear();
 	
-	newTex.AddLine(tex.GetFirstLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), title1, title2));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), sMonth, sDate));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[0]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[1]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[2]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[3]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[4]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[5]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[6]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[7]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[8]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[9]));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), drawer));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[10]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[11]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[12]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[13]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[14]));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), onhand));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[15]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[13]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[16]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[12]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[17]));
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), value[18]));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), payable));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), (drawer + onhand)));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), payable));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(wxString::Format((tex.GetNextLine()), difference));
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.AddLine(tex.GetNextLine());
-	newTex.Write();
-	newTex.Close();
-	tex.Close();
+	newReport.AddLine(report.GetFirstLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), title1, title2));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), sMonth, sDate));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[0]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[1]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[2]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[3]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[4]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[5]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[6]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[7]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[8]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[9]));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), drawer));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[10]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[11]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[12]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[13]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[14]));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), onhand));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[15]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[13]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[16]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[12]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[17]));
+	newReport.AddLine(wxString::Format((report.GetNextLine()), value[18]));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), payable));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), (drawer + onhand)));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), payable));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(wxString::Format((report.GetNextLine()), difference));
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.AddLine(report.GetNextLine());
+	newReport.Write();
+	newReport.Close();
+	report.Close();
 	
-	wxExecute(wxString::Format((".\\XeLaTeX\\tectonic.exe .\\XeLaTeX\\daily\\%s.tex --outdir .\\XeLaTeX\\PDF\\report"), date));
+	if (!wxExecute(wxString::Format((".\\tectonic.exe .\\data\\daily\\%s.tex -c minimal -o .\\report"), date)))
+		wxLogMessage("Error generating report!");
 }
