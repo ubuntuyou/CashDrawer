@@ -6,5 +6,6 @@ wxWidgets
 *.csv
 *.pdf
 *.tex
-!CashDrawer.tex
+.\XeLaTeX\*
+!Report.tex
 !Summary.tex
