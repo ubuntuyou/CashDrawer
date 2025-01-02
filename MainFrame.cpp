@@ -201,36 +201,37 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 	difference = 0;
 
 	submitButton->Enable();
+	edit->SetValue(false);
 
 	// Get values from entries
 	newLine = date;
 
 	for (int i = 0; i < 19; i++) {
 		entry[i]->GetValue().ToDouble(&value[i]);
-		newLine += wxString::Format(wxT(",$%.2f"), value[i]);
+		newLine += wxString::Format(wxT(",%.2f"), value[i]);
 	}
 
 	// Drawer
 	for (int i = 0; i < 10; i++)
 		drawer += value[i];
-	label[DRAWER_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), drawer));
+	label[DRAWER_TOTAL]->SetLabel(wxString::Format(wxT("%.2f"), drawer));
 
 	// On Hand
 	//onhand = drawer;
 	for (int i = 10; i < 15; i++)
 		onhand += value[i];
-	label[ONHAND_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), onhand));
+	label[ONHAND_TOTAL]->SetLabel(wxString::Format(wxT("%.2f"), onhand));
 
 	// Accounts Payable
 	payable = value[12] + value[13];
 	for (int i = 15; i < 19; i++)
 		payable += value[i];
-	label[ACTPAY_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), payable));
+	label[ACTPAY_TOTAL]->SetLabel(wxString::Format(wxT("%.2f"), payable));
 
 	// Difference between Money on Hand and Accounts Payable
 	difference = ((drawer + onhand) >= payable) ? ((drawer + onhand) - payable) : (payable - (drawer + onhand));
-	label[DIFFER_TOTAL]->SetLabel(wxString::Format(wxT("$%.2f"), difference));
-	newLine += (wxString::Format(wxT(",$%.2f,$%.2f,$%.2f,$%.2f"), drawer, onhand, payable, difference));
+	label[DIFFER_TOTAL]->SetLabel(wxString::Format(wxT("%.2f"), difference));
+	newLine += (wxString::Format(wxT(",%.2f,%.2f,%.2f,%.2f"), drawer, onhand, payable, difference));
 
 	wxLogStatus(wxString::Format(wxT("%s, $%.2f, $%.2f, $%.2f, $%.2f"), date, drawer, onhand, payable, difference));
 }
@@ -272,7 +273,7 @@ void MainFrame::CheckDateExists() {
 	if (!file.Exists()) {
 		file.Create();
 		file.Open();
-		wxMessageBox("Created a new file. Happy new year!");
+		//wxMessageBox("Created a new file.");
 	}
 	if (!file.IsOpened()) {
 		file.Open();
@@ -317,11 +318,12 @@ void MainFrame::CheckDateExists() {
 			break;
 		}
 	}
-	if ((!dateExists && !submitted) || (dateExists && clobber)) {
+	if (!dateExists && !submitted) {
 		calculateButton->Enable();
 		submitButton->Disable();
 		printButton->Disable();
-		if (!dateExists) edit->Disable();
+		
+		//if (!dateExists) edit->Disable();
 
 		for (int i = 0; i < 19; i++) {
 			entry[i]->SetValue("0.00");
@@ -332,6 +334,24 @@ void MainFrame::CheckDateExists() {
 		label[ACTPAY_TOTAL]->SetLabel(" ");
 		label[DIFFER_TOTAL]->SetLabel(" ");
 		
+		wxLogStatus(" ");
+	}
+	if (dateExists && clobber) {
+		calculateButton->Enable();
+		submitButton->Disable();
+		printButton->Disable();
+
+		//if (!dateExists) edit->Disable();
+
+		for (int i = 0; i < 19; i++) {
+			//entry[i]->SetValue("0.00");
+			entry[i]->SetEditable(true);
+		}
+		//label[DRAWER_TOTAL]->SetLabel(" ");
+		//label[ONHAND_TOTAL]->SetLabel(" ");
+		//label[ACTPAY_TOTAL]->SetLabel(" ");
+		//label[DIFFER_TOTAL]->SetLabel(" ");
+
 		wxLogStatus(" ");
 	}
 	if ((!dateExists && submitted) || (submitted && clobber)) {
