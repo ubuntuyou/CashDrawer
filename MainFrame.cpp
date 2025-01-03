@@ -322,8 +322,6 @@ void MainFrame::CheckDateExists() {
 		calculateButton->Enable();
 		submitButton->Disable();
 		printButton->Disable();
-		
-		//if (!dateExists) edit->Disable();
 
 		for (int i = 0; i < 19; i++) {
 			entry[i]->SetValue("0.00");
@@ -341,16 +339,9 @@ void MainFrame::CheckDateExists() {
 		submitButton->Disable();
 		printButton->Disable();
 
-		//if (!dateExists) edit->Disable();
-
 		for (int i = 0; i < 19; i++) {
-			//entry[i]->SetValue("0.00");
 			entry[i]->SetEditable(true);
 		}
-		//label[DRAWER_TOTAL]->SetLabel(" ");
-		//label[ONHAND_TOTAL]->SetLabel(" ");
-		//label[ACTPAY_TOTAL]->SetLabel(" ");
-		//label[DIFFER_TOTAL]->SetLabel(" ");
 
 		wxLogStatus(" ");
 	}
