@@ -201,7 +201,7 @@ void MainFrame::OnCalculateClicked(wxCommandEvent& evt) {
 	difference = 0;
 
 	submitButton->Enable();
-	edit->SetValue(false);
+	//edit->SetValue(false);
 
 	// Get values from entries
 	newLine = date;
