@@ -3,11 +3,8 @@
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
 #include <wx/textfile.h>
-#include <wx/filefn.h>
 #include <wx/tokenzr.h>
 #include <wx/vector.h>
-#include <wx/numformatter.h>
-#include <wx/file.h>
 #include "resource.h"
 
 #define DRAWER_LABEL 20
@@ -322,6 +319,7 @@ void MainFrame::CheckDateExists() {
 		calculateButton->Enable();
 		submitButton->Disable();
 		printButton->Disable();
+		edit->Disable();
 
 		for (int i = 0; i < 19; i++) {
 			entry[i]->SetValue("0.00");
@@ -383,7 +381,6 @@ void MainFrame::CheckDateExists() {
 void MainFrame::CreatePDF() {
 	wxString date = picker->GetValue().Format("%m-%d-%Y");
 	wxString sMonth = picker->GetValue().Format("%b");
-	wxString lMonth = picker->GetValue().Format("%B");
 	wxString sDate = picker->GetValue().Format("%d, %Y");
 	wxString month = picker->GetValue().Format("%m");
 	wxString year = picker->GetValue().Format("%Y");
